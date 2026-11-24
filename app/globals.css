@@ -487,3 +487,14 @@ label{color:#4d594d}
 .public-portfolio-card a{color:#405b49;font-size:10px;font-weight:900}
 .public-company-footer{padding:28px;text-align:center;color:#9a927f;font-size:10px}
 @media(max-width:640px){.public-company-shell{padding:12px}.public-company-hero{padding:35px 17px;margin-top:25px}.neighbor-cta{align-items:flex-start;flex-direction:column}.public-company-section{padding:17px}.public-portfolio-grid{grid-template-columns:1fr}}
+
+/* Retire the remaining violet dashboard tokens */
+.text-violet-700,.text-violet-600,.text-violet-500{color:#526b50!important}
+.bg-violet-50,.bg-violet-100{background:#e8e9df!important}
+.border-violet-100,.border-violet-200{border-color:#d4d7c8!important}
+.text-slate-500,.text-slate-400,.text-slate-600{color:#7d8176!important}
+.border-slate-100,.border-slate-200{border-color:#ded8c9!important}
+.bg-white{background-color:#fbf9f2}
+.office-card{border-radius:4px!important;background:#faf8f0!important;border:1px solid #d7cfbf!important;box-shadow:0 5px 18px #493b2510!important}
+.office-card-mark,.stat-icon{background:#e7e8de!important;color:#405b49!important;border-radius:3px!important}
+.status-live,.status-idle{border-radius:3px!important}

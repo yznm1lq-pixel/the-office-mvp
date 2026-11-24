@@ -24,7 +24,9 @@ async function signedInClient() {
 export async function createCompany(formData: FormData) {
   const name = textValue(formData, "companyName");
   if (name.length < 2 || name.length > 80) redirect("/?error=company-name");
-  const { supabase } = await signedInClient();
+  const { supabase, userId } = await signedInClient();
+  const { data: profile } = await supabase.from("profiles").select("full_name,username").eq("id",userId).maybeSingle();
+  if (!profile?.full_name || !profile?.username) redirect("/onboarding/profile?next=%2F");
   const { data: companyId, error } = await supabase.rpc("create_company", { company_name: name });
   if (error) {
     if (error.message.includes("COMPANY_LIMIT_REACHED")) redirect("/?error=company-limit");
@@ -43,6 +45,20 @@ export async function createDepartment(formData: FormData) {
   if (error) redirect(`/offices/${companyId}?error=department`);
   revalidatePath(`/offices/${companyId}`);
   redirect(`/offices/${companyId}?stage=departments&department=created`);
+}
+
+export async function addCompanyMemberByUsername(formData: FormData) {
+  const companyId=textValue(formData,"companyId");
+  const username=textValue(formData,"username").toLowerCase().replace(/^@/,"");
+  const role=textValue(formData,"role")||"member";
+  const departmentId=textValue(formData,"departmentId")||null;
+  if(!uuidPattern.test(companyId)||! /^[a-z0-9_]{3,24}$/.test(username)) redirect(`/offices/${companyId}/team?error=username`);
+  const {supabase}=await signedInClient();
+  const {error}=await supabase.rpc("add_company_member_by_username",{p_company_id:companyId,p_username:username,p_role:role,p_department_id:departmentId});
+  if(error) redirect(`/offices/${companyId}/team?error=${error.message.includes("USERNAME_NOT_FOUND")?"username-not-found":"member"}`);
+  revalidatePath(`/offices/${companyId}/team`);
+  revalidatePath(`/offices/${companyId}/virtual`);
+  redirect(`/offices/${companyId}/team?added=1`);
 }
 
 export async function createInvitation(formData: FormData) {
@@ -302,12 +318,18 @@ export async function signOut() {
 
 
 export async function updateMyProfile(formData: FormData) {
- const fullName=textValue(formData,"fullName"); const avatarUrl=textValue(formData,"avatarUrl") || textValue(formData,"emoji");
- if(fullName.length<2||fullName.length>80||avatarUrl.length>500) redirect("/profile?error=profile");
+ const fullName=textValue(formData,"fullName");
+ const jobTitle=textValue(formData,"jobTitle").slice(0,100);
+ const bio=textValue(formData,"bio").slice(0,500);
+ const avatarUrl=textValue(formData,"avatarUrl") || textValue(formData,"emoji") || null;
+ const websiteUrl=safeUrl(textValue(formData,"websiteUrl"));
+ const socialLinks={linkedin:safeUrl(textValue(formData,"linkedin")),x:safeUrl(textValue(formData,"x")),instagram:safeUrl(textValue(formData,"instagram"))};
+ if(fullName.length<2||fullName.length>80||!avatarUrl&&textValue(formData,"emoji").length>8) redirect("/onboarding/profile?error=profile");
  const {supabase,userId}=await signedInClient();
- const {error}=await supabase.from("profiles").update({full_name:fullName,avatar_url:avatarUrl||null,updated_at:new Date().toISOString()}).eq("id",userId);
- if(error) redirect("/profile?error=profile");
- revalidatePath("/profile"); revalidatePath("/");
+ const {error}=await supabase.from("profiles").update({full_name:fullName,job_title:jobTitle||null,bio:bio||null,avatar_url:avatarUrl,website_url:websiteUrl,social_links:socialLinks,updated_at:new Date().toISOString()}).eq("id",userId);
+ if(error) redirect("/onboarding/profile?error=profile");
+ revalidatePath("/profile");revalidatePath("/");revalidatePath("/onboarding/profile");
+ if(textValue(formData,"next")==="/") redirect("/");
  redirect("/profile?saved=1");
 }
 

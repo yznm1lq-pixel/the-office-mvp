@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const uuidPattern = /^[0-9a-f-]{36}$/i;
 const textValue = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
+const escapeHtml = (value: string) => value.replace(/[&<>"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[char] ?? char));
 const safeUrl = (value: string) => {
   if (!value) return null;
   try { const url = new URL(value); return ["https:","http:"].includes(url.protocol) ? url.toString() : null; }
@@ -50,26 +51,38 @@ export async function createInvitation(formData: FormData) {
   const role = textValue(formData, "role") || "member";
   const departmentId = textValue(formData, "departmentId") || null;
   const inviteeName = textValue(formData, "inviteeName");
-  if (!uuidPattern.test(companyId) || !email.includes("@") || inviteeName.length < 2 || inviteeName.length > 100) redirect(`/offices/${companyId}/team?error=invite`);
-  const { supabase } = await signedInClient();
-  const { data: token, error } = await supabase.rpc("create_company_invitation", {
-    p_company_id: companyId, p_email: email, p_role: role, p_department_id: departmentId, p_invitee_name: inviteeName,
-  });
-  if (error || !token) redirect(`/offices/${companyId}/team?error=invite`);
+  if (!uuidPattern.test(companyId) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || inviteeName.length < 2 || inviteeName.length > 100) {
+    redirect(`/offices/${companyId}/team?error=invite`);
+  }
+
+  // لا ننشئ دعوة معلقة إذا لم يكن إرسال البريد مهيأ.
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.INVITATION_FROM_EMAIL;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
-  if (!apiKey || !from || !baseUrl) redirect(`/offices/${companyId}/team?error=email-config`);
+  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://the-office-mvp.vercel.app")).replace(/\/$/, "");
+  if (!apiKey || !from) redirect(`/offices/${companyId}/team?error=email-config`);
+
+  const { supabase } = await signedInClient();
+  const [{ data: company }, { data: token, error }] = await Promise.all([
+    supabase.from("companies").select("name").eq("id", companyId).maybeSingle(),
+    supabase.rpc("create_company_invitation", {
+      p_company_id: companyId, p_email: email, p_role: role, p_department_id: departmentId, p_invitee_name: inviteeName,
+    }),
+  ]);
+  if (error || !token || !company) redirect(`/offices/${companyId}/team?error=invite`);
+
   const invitationUrl = `${baseUrl}/invite/${encodeURIComponent(token)}`;
+  const safeName = escapeHtml(inviteeName);
+  const safeCompany = escapeHtml(company.name);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from,
       to: [email],
-      subject: `دعوة للانضمام إلى ${inviteeName ? "فريق " + inviteeName : "مساحة عمل"}` ,
-      html: `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:560px;margin:40px auto;padding:32px;border:1px solid #e5e2d8;border-radius:12px;color:#29352d"><h2>مرحبًا ${inviteeName}</h2><p>تمت دعوتك للانضمام إلى فريق الشركة. اضغط الزر أدناه لإكمال انضمامك.</p><p style="margin:28px 0"><a href="${invitationUrl}" style="background:#405d4d;color:white;padding:13px 22px;border-radius:7px;text-decoration:none">قبول الدعوة والانضمام</a></p><p style="color:#777;font-size:12px">إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل الرسالة.</p></div>`,
+      subject: `دعوة للانضمام إلى ${company.name}`,
+      html: `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:560px;margin:40px auto;padding:32px;border:1px solid #e5e2d8;border-radius:12px;color:#29352d"><h2>مرحبًا ${safeName}</h2><p>تمت دعوتك للانضمام إلى <strong>${safeCompany}</strong>.</p><p style="margin:28px 0"><a href="${invitationUrl}" style="background:#405d4d;color:white;padding:13px 22px;border-radius:7px;text-decoration:none">قبول الدعوة والانضمام</a></p><p style="color:#777;font-size:12px">صلاحية الدعوة 7 أيام. إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل الرسالة.</p></div>`,
     }),
+    cache: "no-store",
   });
   if (!response.ok) redirect(`/offices/${companyId}/team?error=email-send`);
   revalidatePath(`/offices/${companyId}/team`);

@@ -100,13 +100,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </section>
 
         <section className="mt-10">
-          <div className="mb-5 flex items-center justify-between"><div><h2 className="text-xl font-black">مكاتبي</h2><p className="mt-1 text-sm text-slate-500">اختر مكتبًا للانتقال إلى مساحته وإكمال إعداده.</p></div><span className="text-xs text-slate-400">{officeCount} مكتب</span></div>
+          <div className="mb-5 flex items-center justify-between"><div><h2 className="text-xl font-black">مكاتبي</h2><p className="mt-1 text-sm text-slate-500">ادخل إلى مكتبك الافتراضي، وتابع فريقك وأعمالك وإعداداتك.</p></div><span className="text-xs text-slate-400">{officeCount} مكتب</span></div>
           {offices.length ? (
             <div className="grid gap-4 lg:grid-cols-2">
               {offices.map((office) => (
-                <Link href={`/offices/${office.id}`} key={office.id} className="office-card group">
+                <Link href={`/offices/${office.id}/virtual`} key={office.id} className="office-card group">
                   <div className="flex items-start justify-between gap-3"><div className="flex items-center gap-3"><span className="office-card-mark">◈</span><div><h3 className="font-black">{office.name}</h3><p className="mt-1 text-xs text-slate-400">أنشئ في {new Date(office.created_at).toLocaleDateString("ar-SA")}</p></div></div><span className={office.activeEmployees ? "status-live" : "status-idle"}><i />{office.activeEmployees ? "نشط الآن" : "غير نشط"}</span></div>
-                  <div className="mt-7 flex items-center gap-7 border-t border-slate-100 pt-5"><div><p className="text-xs text-slate-400">الأعضاء</p><p className="mt-1 text-lg font-black tabular-nums">{office.employees}</p></div><div><p className="text-xs text-slate-400">متصلون الآن</p><p className="mt-1 text-lg font-black tabular-nums">{office.activeEmployees}</p></div><span className="mr-auto text-sm font-bold text-violet-700 transition group-hover:-translate-x-1">إدارة المكتب ←</span></div>
+                  <div className="mt-7 flex items-center gap-7 border-t border-slate-100 pt-5"><div><p className="text-xs text-slate-400">الأعضاء</p><p className="mt-1 text-lg font-black tabular-nums">{office.employees}</p></div><div><p className="text-xs text-slate-400">متصلون الآن</p><p className="mt-1 text-lg font-black tabular-nums">{office.activeEmployees}</p></div><span className="mr-auto text-sm font-bold text-violet-700 transition group-hover:-translate-x-1">دخول المكتب الافتراضي ←</span></div>
                 </Link>
               ))}
             </div>

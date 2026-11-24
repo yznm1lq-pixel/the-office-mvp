@@ -11,12 +11,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const configured = isSupabaseConfigured();
   let userEmail: string | null = null;
+  let isPlatformAdmin = false;
   let offices: OfficeStats[] = [];
 
   if (configured) {
     const supabase = await createClient();
     const { data } = await supabase.auth.getClaims();
     userEmail = typeof data?.claims?.email === "string" ? data.claims.email : null;
+    if (userEmail) {
+      const { data: adminFlag } = await supabase.rpc("is_platform_admin");
+      isPlatformAdmin = adminFlag === true;
+    }
 
     if (userEmail) {
       const { data: rows } = await supabase.from("companies").select("id,name,slug,created_at").order("created_at", { ascending: false });
@@ -77,7 +82,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <div className="mx-auto max-w-7xl">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 font-black text-xl"><span className="brand-mark">◈</span> المكتب</Link>
-          <div className="flex items-center gap-4"><span className="hidden text-sm text-slate-500 sm:block">{userEmail}</span><form action={signOut}><button className="text-sm font-semibold text-slate-500 hover:text-rose-600">تسجيل الخروج</button></form></div>
+          <div className="flex items-center gap-4">{isPlatformAdmin && <Link href="/platform-admin" className="secondary-button">إدارة المنصة</Link>}<span className="hidden text-sm text-slate-500 sm:block">{userEmail}</span><form action={signOut}><button className="text-sm font-semibold text-slate-500 hover:text-rose-600">تسجيل الخروج</button></form></div>
         </header>
 
         <section className="mt-9 flex flex-col justify-between gap-5 md:flex-row md:items-end">

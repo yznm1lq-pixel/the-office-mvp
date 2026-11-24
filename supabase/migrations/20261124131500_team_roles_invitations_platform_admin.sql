@@ -213,3 +213,60 @@ using (
       and private.current_company_role(m.company_id) is not null
   )
 );
+
+-- Keep department assignments within their company and scope project management.
+drop policy if exists company_members_update_admins on public.company_members;
+create policy company_members_update_admins on public.company_members
+for update to authenticated
+using (
+  private.current_company_role(company_id) in ('owner','admin')
+  and role <> 'owner'
+  and (private.current_company_role(company_id)='owner' or role <> 'admin')
+)
+with check (
+  private.current_company_role(company_id) in ('owner','admin')
+  and role <> 'owner'
+  and (private.current_company_role(company_id)='owner' or role <> 'admin')
+  and (role <> 'department_head' or department_id is not null)
+  and (department_id is null or exists(
+    select 1 from public.departments d where d.id=company_members.department_id and d.company_id=company_members.company_id
+  ))
+);
+
+drop policy if exists projects_insert_members on public.projects;
+create policy projects_insert_members on public.projects
+for insert to authenticated
+with check (
+  created_by=(select auth.uid())
+  and (
+    private.current_company_role(company_id) in ('owner','admin')
+    or exists (
+      select 1 from public.company_members m
+      where m.company_id=projects.company_id and m.user_id=(select auth.uid())
+        and m.role='department_head' and m.department_id=projects.department_id
+    )
+  )
+  and (department_id is null or exists(
+    select 1 from public.departments d where d.id=projects.department_id and d.company_id=projects.company_id
+  ))
+);
+
+drop policy if exists projects_update_members on public.projects;
+create policy projects_update_members on public.projects
+for update to authenticated
+using (
+  private.current_company_role(company_id) in ('owner','admin')
+  or exists (
+    select 1 from public.company_members m
+    where m.company_id=projects.company_id and m.user_id=(select auth.uid())
+      and m.role='department_head' and m.department_id=projects.department_id
+  )
+)
+with check (
+  private.current_company_role(company_id) in ('owner','admin')
+  or exists (
+    select 1 from public.company_members m
+    where m.company_id=projects.company_id and m.user_id=(select auth.uid())
+      and m.role='department_head' and m.department_id=projects.department_id
+  )
+);

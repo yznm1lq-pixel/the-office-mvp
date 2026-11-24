@@ -28,12 +28,12 @@ export default async function VirtualOfficePage({params,searchParams}:Props){
   <section className="virtual-heading"><div><p className="eyebrow">مساحتكم الرقمية</p><h1>{office.name}</h1><p>{office.description||"مساحة تجمع فريقكم، أقسامكم وأعمالكم في مكان واحد."}</p></div><div className="virtual-live-pill"><i/> {live.size} متصل الآن</div></section>
   <section className="virtual-dashboard">
    <div className="virtual-floor-panel">
-    <div className="floor-label"><div><span className="eyebrow">THE OFFICE / LIVE SPACE</span><h2>المكتب الافتراضي</h2></div><span className="floor-chip">المساحة الرئيسية</span></div>
-    <div className="isometric-scene"><div className="iso-floor">
-      <div className="floor-grid"/>
-      {departmentsList.slice(0,6).map((d,index)=><div className={`iso-zone zone-${index+1}`} key={d.id} style={{["--zone-color" as any]:d.color}}><span>{d.name}</span><div className="iso-desk"><i/><i/></div><div className="iso-desk second"><i/><i/></div></div>)}
-      <div className="iso-lounge"><span>مساحة اللقاء</span><div className="lounge-sofa"/><div className="lounge-table"/></div>
-    </div></div>
+    <div className="floor-label"><div><span className="eyebrow">FLOOR PLAN / LIVE OFFICE</span><h2>المكتب الافتراضي</h2></div><span className="floor-chip">مخطط الطابق</span></div>
+    <div className="office-plan-scene"><div className="office-plan-building">
+      {departmentsList.slice(0,4).map((d:any)=><section className="office-room" key={d.id}><h3>{d.name}</h3><div className="office-room-desks">{people.filter((m:any)=>m.department_id===d.id).slice(0,6).map((m:any)=>{const profile=Array.isArray(m.profiles)?m.profiles[0]:m.profiles;return <div className="office-desk" key={m.user_id}><i/><span>{profile?.full_name??"موظف"}</span></div>})}{people.filter((m:any)=>m.department_id===d.id).length===0&&<div className="office-desk is-empty"><i/><span>مقعد شاغر</span></div>}</div></section>)}
+      {departmentsList.length===0&&<section className="office-room"><h3>المساحة الرئيسية</h3><div className="office-room-desks">{people.slice(0,6).map((m:any)=>{const profile=Array.isArray(m.profiles)?m.profiles[0]:m.profiles;return <div className="office-desk" key={m.user_id}><i/><span>{profile?.full_name??"موظف"}</span></div>})}</div></section>}
+      <div className="office-plan-lounge">منطقة الاستقبال والاجتماعات</div><div className="office-plan-entry"/>
+    </div><div className="office-plan-caption"><span>مخطط علوي للمكتب · توزيع فعلي للمقاعد والأقسام</span><span>المقاعد الخضراء: الفريق</span></div></div>
     <div className="floor-legend"><span><i className="legend-online"/> متصل الآن</span><span><i className="legend-offline"/> غير متصل</span><span>تتحدث حالة الحضور تلقائيًا</span></div>
    </div>
    <aside className="virtual-side">

@@ -676,3 +676,12 @@ body{background:var(--paper);color:var(--ink)}
  .office-chat-feed{padding:14px;min-height:350px}.chat-message{max-width:96%}
  .office-chat-composer{grid-template-columns:1fr}.office-chat-composer button{width:100%}
 }
+
+.member-contact-link{display:inline-block;margin-top:5px;color:#526b58;font-size:10px;font-weight:850;text-decoration:underline;text-underline-offset:3px}
+.inbox-list{display:grid;gap:10px}
+.inbox-row{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;padding:18px;border:1px solid #deded2;border-radius:14px;background:#fbfaf5}
+.inbox-row.unread{border-color:#c8d7c4;background:#f2f6ee;box-shadow:inset -3px 0 #648267}
+.inbox-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#e3eade;color:#526b58;font-size:20px}
+.inbox-row strong{font-size:13px;color:#35483c}.inbox-row p{margin:5px 0;color:#737c70;font-size:11px;line-height:1.8}.inbox-row small{color:#999887;font-size:9px}
+.inbox-actions{display:flex;gap:7px;flex-wrap:wrap}.inbox-actions a{padding:9px 12px;border:1px solid #d5ddcf;border-radius:8px;color:#435c49;font-size:10px;font-weight:800}.inbox-actions a:first-child{background:#405b49;color:#fff;border-color:#405b49}
+@media(max-width:620px){.inbox-row{grid-template-columns:38px 1fr}.inbox-actions{grid-column:2}.inbox-actions a{flex:1;text-align:center}}

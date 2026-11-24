@@ -11,6 +11,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const configured = isSupabaseConfigured();
   let userEmail: string | null = null;
+  let userId: string | null = null;
   let isPlatformAdmin = false;
   let offices: OfficeStats[] = [];
 
@@ -18,13 +19,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     const supabase = await createClient();
     const { data } = await supabase.auth.getClaims();
     userEmail = typeof data?.claims?.email === "string" ? data.claims.email : null;
+    userId = typeof data?.claims?.sub === "string" ? data.claims.sub : null;
     if (userEmail) {
       const { data: adminFlag } = await supabase.rpc("is_platform_admin");
       isPlatformAdmin = adminFlag === true;
     }
 
-    if (userEmail) {
-      const { data: rows } = await supabase.from("companies").select("id,name,slug,created_at").order("created_at", { ascending: false });
+    if (userId) {
+      // لا تعرض أي شركة إلا إذا كان المستخدم عضوًا فيها.
+      const { data: memberships } = await supabase.from("company_members").select("company_id").eq("user_id", userId);
+      const companyIds = [...new Set((memberships ?? []).map((membership) => membership.company_id))];
+      const { data: rows } = companyIds.length
+        ? await supabase.from("companies").select("id,name,slug,created_at").in("id", companyIds).order("created_at", { ascending: false })
+        : { data: [] };
       const companies = (rows ?? []) as Company[];
       const activeSince = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       offices = await Promise.all(companies.map(async (company) => {
@@ -86,7 +93,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </header>
 
         <section className="mt-9 flex flex-col justify-between gap-5 md:flex-row md:items-end">
-          <div><p className="text-sm font-bold text-violet-700">لوحة إدارة المكاتب</p><h1 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">مساحة عملك من مكان واحد</h1><p className="mt-3 text-sm leading-7 text-slate-500">تابع مكاتبك وأعضاء فرقك وحالة النشاط المباشر.</p></div>
+          <div><p className="text-sm font-bold text-violet-700">{officeCount ? "مساحة فريقك" : "مرحبًا بك في المكتب"}</p><h1 className="mt-2 text-3xl font-black tracking-tight md:text-4xl">{officeCount ? "مساحة عملك من مكان واحد" : "ابدأ بإنشاء شركتك أو انضم إلى فريقك"}</h1><p className="mt-3 text-sm leading-7 text-slate-500">{officeCount ? "هذه هي الشركات التي أنت عضو فيها فقط." : "لن نعرض لك لوحة إدارة قبل أن تنشئ شركة أو تقبل دعوة للانضمام إلى شركة."}</p></div>
           <span className="rounded-full border border-violet-100 bg-violet-50 px-4 py-2 text-xs font-bold text-violet-700">الباقة المجانية · مكتب واحد</span>
         </section>
 
@@ -113,7 +120,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           ) : <div className="empty-state"><span className="text-3xl">◈</span><h3 className="mt-3 font-black">لم تنشئ مكتبك بعد</h3><p className="mt-2 text-sm text-slate-500">ابدأ بإنشاء مساحة عملك الأولى.</p></div>}
         </section>
 
-        {officeCount === 0 && <section className="mt-7 rounded-3xl border border-violet-100 bg-white p-6 md:p-8"><div className="max-w-xl"><h2 className="text-xl font-black">إنشاء مكتبك الأول</h2><p className="mt-2 text-sm leading-7 text-slate-500">أنشئ شركتك مرة واحدة، ثم جهّز أقسامها وابدأ العمل مع فريقك.</p><form action={createCompany} className="mt-5 flex flex-col gap-3 sm:flex-row"><input className="field flex-1" name="companyName" placeholder="اسم الشركة أو الفريق" minLength={2} maxLength={80} required /><button className="primary-button whitespace-nowrap" type="submit">إنشاء المكتب</button></form></div></section>}
+        {officeCount === 0 && <section className="mt-7 rounded-3xl border border-violet-100 bg-white p-6 md:p-8"><div className="max-w-xl"><h2 className="text-xl font-black">ابدأ مساحة عملك</h2><p className="mt-2 text-sm leading-7 text-slate-500">أنشئ شركتك لتصبح رئيسها، أو افتح رابط دعوة وصلك من مدير شركتك للانضمام كموظف.</p><form action={createCompany} className="mt-5 flex flex-col gap-3 sm:flex-row"><input className="field flex-1" name="companyName" placeholder="اسم الشركة أو الفريق" minLength={2} maxLength={80} required /><button className="primary-button whitespace-nowrap" type="submit">إنشاء المكتب</button></form></div></section>}
         <p className="mt-10 text-center text-xs text-slate-400">يتم تحديث مؤشرات النشاط تلقائيًا كل 30 ثانية.</p>
       </div>
     </main>

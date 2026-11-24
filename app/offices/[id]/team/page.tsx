@@ -50,9 +50,9 @@ export default async function TeamPage({ params, searchParams }: Props) {
                     <input type="hidden" name="companyId" value={id}/><input type="hidden" name="userId" value={member.user_id}/>
                     <select name="role" defaultValue={member.role} className="compact-select">
                       {canAssignAdmin && <option value="admin">مدير الشركة</option>}
-                      <option value="department_head">رئيس قسم</option><option value="member">موظف</option>
+                      {departments.length > 0 && <option value="department_head">رئيس قسم</option>}<option value="member">موظف</option>
                     </select>
-                    <select name="departmentId" defaultValue={member.department_id ?? ""} className="compact-select" aria-label="القسم">
+                    <select name="departmentId" defaultValue={member.department_id ?? departments[0]?.id ?? ""} className="compact-select" aria-label="القسم">
                       <option value="">اختر القسم</option>{departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                     </select>
                     <button className="icon-action" type="submit">حفظ</button>
@@ -69,7 +69,7 @@ export default async function TeamPage({ params, searchParams }: Props) {
           {canManage ? <form action={createInvitation} className="invite-form">
             <input type="hidden" name="companyId" value={id}/>
             <label>البريد الإلكتروني</label><input className="field" name="email" type="email" placeholder="name@company.com" required/>
-            <label>الصلاحية</label><select className="field" name="role" defaultValue="member"><option value="member">موظف</option><option value="department_head">رئيس قسم</option>{canAssignAdmin && <option value="admin">مدير الشركة</option>}</select>
+            <label>الصلاحية</label><select className="field" name="role" defaultValue="member"><option value="member">موظف</option>{departments.length > 0 && <option value="department_head">رئيس قسم</option>}{canAssignAdmin && <option value="admin">مدير الشركة</option>}</select>
             <label>القسم</label><select className="field" name="departmentId" defaultValue=""><option value="">بدون قسم</option>{departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
             <button className="primary-button w-full" type="submit">إنشاء رابط الدعوة</button>
           </form> : <div className="permission-note">إدارة الدعوات وتغيير الصلاحيات متاحة لمدير الشركة ورئيسها فقط.</div>}

@@ -289,7 +289,7 @@ export async function signOut() {
 
 
 export async function updateMyProfile(formData: FormData) {
- const fullName=textValue(formData,"fullName"); const avatarUrl=textValue(formData,"avatarUrl");
+ const fullName=textValue(formData,"fullName"); const avatarUrl=textValue(formData,"avatarUrl") || textValue(formData,"emoji");
  if(fullName.length<2||fullName.length>80||avatarUrl.length>500) redirect("/profile?error=profile");
  const {supabase,userId}=await signedInClient();
  const {error}=await supabase.from("profiles").update({full_name:fullName,avatar_url:avatarUrl||null,updated_at:new Date().toISOString()}).eq("id",userId);

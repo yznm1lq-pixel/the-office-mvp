@@ -195,3 +195,15 @@ with check (
     select 1 from public.projects p where p.id=tasks.project_id and p.company_id=tasks.company_id
   ))
 );
+
+-- Team members can see the names of other members in the same company.
+drop policy if exists profiles_read_company_members on public.profiles;
+create policy profiles_read_company_members on public.profiles
+for select to authenticated
+using (
+  exists (
+    select 1 from public.company_members m
+    where m.user_id=profiles.id
+      and private.current_company_role(m.company_id) is not null
+  )
+);

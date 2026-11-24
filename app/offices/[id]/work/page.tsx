@@ -15,7 +15,7 @@ export default async function WorkPage({ params, searchParams }: Props) {
 
   const [company, membership, departments, projects, tasks, members] = await Promise.all([
     supabase.from("companies").select("id,name").eq("id",id).maybeSingle(),
-    supabase.from("company_members").select("role").eq("company_id",id).eq("user_id",userId).maybeSingle(),
+    supabase.from("company_members").select("role,department_id").eq("company_id",id).eq("user_id",userId).maybeSingle(),
     supabase.from("departments").select("id,name").eq("company_id",id).order("name"),
     supabase.from("projects").select("id,name,status,department_id,created_at").eq("company_id",id).order("created_at",{ascending:false}),
     supabase.from("tasks").select("id,title,status,priority,project_id,assignee_id,due_date").eq("company_id",id).order("created_at",{ascending:false}).limit(50),
@@ -24,7 +24,8 @@ export default async function WorkPage({ params, searchParams }: Props) {
   if (!company.data || !membership.data) notFound();
   const role = membership.data.role;
   const canManage = role === "owner" || role === "admin" || role === "department_head";
-  const departmentRows = departments.data ?? [];
+  const allDepartments = departments.data ?? [];
+  const departmentRows = membership.data.role === "department_head" ? allDepartments.filter((d) => d.id === membership.data.department_id) : allDepartments;
   const projectRows = projects.data ?? [];
   const taskRows = tasks.data ?? [];
   const memberRows = members.data ?? [];

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PresenceHeartbeat } from "@/components/presence-heartbeat";
+import { VirtualOfficeControls } from "@/components/virtual-office-controls";
 import { signOut } from "@/app/actions";
 
 type Props={params:Promise<{id:string}>;searchParams:Promise<{joined?:string}>};
@@ -44,6 +45,7 @@ export default async function VirtualOfficePage({params,searchParams}:Props){
     </section>
    </aside>
   </section>
+  <VirtualOfficeControls companyId={id} departments={departmentsList.map((d:any)=>({id:d.id,name:d.name,color:d.color}))} people={people.map((m:any)=>{const profile=Array.isArray(m.profiles)?m.profiles[0]:m.profiles;return {userId:m.user_id,name:profile?.full_name??"عضو الفريق",role:roleNames[m.role]??m.role,departmentId:m.department_id,online:live.has(m.user_id),avatarUrl:profile?.avatar_url??null};})}/>
   <section className="virtual-quick-stats"><Link href={`/offices/${id}/work`}><span>◫</span><div><small>المشاريع</small><strong>{projectsList.length}</strong></div><b>فتح مساحة العمل ←</b></Link><Link href={`/offices/${id}/work`}><span>✓</span><div><small>المهام</small><strong>{tasksList.length}</strong></div><b>متابعة الإنجاز ←</b></Link><Link href={`/offices/${id}/settings`}><span>✦</span><div><small>هوية المكتب</small><strong>إعدادات الشركة</strong></div><b>تخصيص ←</b></Link></section>
   <footer className="virtual-footer">مساحة عملكم، أينما كان فريقكم · المكتب الافتراضي</footer>
  </div></main>;

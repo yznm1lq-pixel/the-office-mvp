@@ -49,10 +49,11 @@ export async function createInvitation(formData: FormData) {
   const email = textValue(formData, "email").toLowerCase();
   const role = textValue(formData, "role") || "member";
   const departmentId = textValue(formData, "departmentId") || null;
-  if (!uuidPattern.test(companyId) || !email.includes("@")) redirect(`/offices/${companyId}/team?error=invite`);
+  const inviteeName = textValue(formData, "inviteeName");
+  if (!uuidPattern.test(companyId) || !email.includes("@") || inviteeName.length < 2 || inviteeName.length > 100) redirect(`/offices/${companyId}/team?error=invite`);
   const { supabase } = await signedInClient();
   const { data: token, error } = await supabase.rpc("create_company_invitation", {
-    p_company_id: companyId, p_email: email, p_role: role, p_department_id: departmentId,
+    p_company_id: companyId, p_email: email, p_role: role, p_department_id: departmentId, p_invitee_name: inviteeName,
   });
   if (error || !token) redirect(`/offices/${companyId}/team?error=invite`);
   const apiKey = process.env.RESEND_API_KEY;
@@ -66,8 +67,8 @@ export async function createInvitation(formData: FormData) {
     body: JSON.stringify({
       from,
       to: [email],
-      subject: "دعوة للانضمام إلى مساحة عمل",
-      html: `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:560px;margin:40px auto;padding:32px;border:1px solid #e5e2d8;border-radius:12px;color:#29352d"><h2>أنت مدعو للانضمام إلى فريق العمل</h2><p>تمت دعوتك للانضمام إلى مساحة الشركة. اضغط الزر أدناه لإكمال انضمامك.</p><p style="margin:28px 0"><a href="${invitationUrl}" style="background:#405d4d;color:white;padding:13px 22px;border-radius:7px;text-decoration:none">قبول الدعوة والانضمام</a></p><p style="color:#777;font-size:12px">إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل الرسالة.</p></div>`,
+      subject: `دعوة للانضمام إلى ${inviteeName ? "فريق " + inviteeName : "مساحة عمل"}` ,
+      html: `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:560px;margin:40px auto;padding:32px;border:1px solid #e5e2d8;border-radius:12px;color:#29352d"><h2>مرحبًا ${inviteeName}</h2><p>تمت دعوتك للانضمام إلى فريق الشركة. اضغط الزر أدناه لإكمال انضمامك.</p><p style="margin:28px 0"><a href="${invitationUrl}" style="background:#405d4d;color:white;padding:13px 22px;border-radius:7px;text-decoration:none">قبول الدعوة والانضمام</a></p><p style="color:#777;font-size:12px">إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل الرسالة.</p></div>`,
     }),
   });
   if (!response.ok) redirect(`/offices/${companyId}/team?error=email-send`);
@@ -284,4 +285,34 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
+}
+
+
+export async function updateMyProfile(formData: FormData) {
+ const fullName=textValue(formData,"fullName"); const avatarUrl=textValue(formData,"avatarUrl");
+ if(fullName.length<2||fullName.length>80||avatarUrl.length>500) redirect("/profile?error=profile");
+ const {supabase,userId}=await signedInClient();
+ const {error}=await supabase.from("profiles").update({full_name:fullName,avatar_url:avatarUrl||null,updated_at:new Date().toISOString()}).eq("id",userId);
+ if(error) redirect("/profile?error=profile");
+ revalidatePath("/profile"); revalidatePath("/");
+ redirect("/profile?saved=1");
+}
+
+export async function createAnnouncement(formData: FormData) {
+ const companyId=textValue(formData,"companyId"); const title=textValue(formData,"title"); const body=textValue(formData,"body"); const audience=textValue(formData,"audience")==="neighbors"?"neighbors":"company";
+ if(!uuidPattern.test(companyId)||title.length<2||title.length>120||body.length<2||body.length>3000) redirect("/");
+ const {supabase,userId}=await signedInClient();
+ const {error}=await supabase.from("company_announcements").insert({company_id:companyId,author_id:userId,title,body,audience});
+ if(error) redirect(`/offices/${companyId}/announcements?error=post`);
+ revalidatePath(`/offices/${companyId}/announcements`); revalidatePath("/neighbors/announcements");
+ redirect(`/offices/${companyId}/announcements?sent=1`);
+}
+
+export async function sendCompanyMessage(formData: FormData) {
+ const companyId=textValue(formData,"companyId"); const body=textValue(formData,"body"); const departmentId=textValue(formData,"departmentId")||null;
+ if(!uuidPattern.test(companyId)||body.length<1||body.length>3000) redirect("/");
+ const {supabase,userId}=await signedInClient();
+ const {error}=await supabase.from("messages").insert({company_id:companyId,department_id:departmentId,sender_id:userId,body});
+ if(error) redirect(`/offices/${companyId}/chat?error=message`);
+ revalidatePath(`/offices/${companyId}/chat`); redirect(`/offices/${companyId}/chat?sent=1`);
 }

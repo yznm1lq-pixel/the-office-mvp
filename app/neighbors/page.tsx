@@ -1,18 +1,43 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-type Props={searchParams:Promise<{office?:string}>};
+import { createNeighborRequest, respondNeighborRequest, proposeNeighborMeeting } from "@/app/actions";
+
+type Props={searchParams:Promise<{office?:string;sent?:string;updated?:string;meeting?:string;error?:string}>};
+const dateLabel=(value:string)=>new Intl.DateTimeFormat("ar-SA",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value));
 export default async function NeighborsPage({searchParams}:Props){
- const {office}=await searchParams;const supabase=await createClient();
- const {data:auth}=await supabase.auth.getClaims();
- return <main className="app-shell"><div className="mx-auto max-w-5xl">
-  <header className="app-header"><Link href="/" className="brand-lockup"><span className="brand-mark">◈</span><span>المكتب</span></Link><Link href={auth?.claims?.sub?"/":"/login"} className="nav-link">{auth?.claims?.sub?"العودة إلى مكاتبي":"تسجيل الدخول"}</Link></header>
-  <section className="panel mx-auto mt-16 max-w-3xl p-8 text-center md:p-12">
-   <span className="panel-icon mx-auto">✦</span><p className="eyebrow mt-5">THE NEIGHBOR NETWORK</p>
-   <h1 className="mt-3 text-3xl font-black">الجيران… علاقات تبدأ من مكتبك.</h1>
-   <p className="mx-auto mt-4 max-w-xl text-sm leading-8 text-slate-500">نعمل على بناء مساحة تجمع المكاتب والشركات، وتتيح لك اكتشاف جيرانك، التعرف على أعمالهم، طلب التواصل، وحجز المواعيد معهم.</p>
-   <div className="neighbor-roadmap mt-8"><div><b>01</b><strong>اكتشف المكاتب</strong><small>تعرّف على الشركات القريبة وتخصصاتها.</small></div><div><b>02</b><strong>ابدأ التواصل</strong><small>اطلب التواصل مع المكتب المناسب.</small></div><div><b>03</b><strong>احجز موعدًا</strong><small>رتّب لقاءً وابدأ فرص التعاون.</small></div></div>
-   {office&&<p className="mt-6 text-xs text-slate-400">جئت من صفحة المكتب: {office}</p>}
-   <Link href="/" className="primary-button mt-8">العودة إلى المكتب</Link>
+ const query=await searchParams;const supabase=await createClient();
+ const {data:auth}=await supabase.auth.getClaims();const userId=auth?.claims?.sub;
+ if(!userId) redirect("/login");
+ const {data:memberships}=await supabase.from("company_members").select("company_id,role,companies(id,name,slug,description,logo_url,website_url,social_links)").eq("user_id",userId);
+ const own=(memberships??[]).map((m:any)=>Array.isArray(m.companies)?m.companies[0]:m.companies).filter(Boolean);
+ if(!own.length) return <main className="neighbors-shell"><div className="neighbors-wrap"><header className="neighbors-nav"><Link href="/" className="brand-lockup"><span className="brand-mark">◈</span><span>المكتب</span></Link><Link href="/" className="neighbor-nav-link">مكاتبي</Link></header><section className="neighbors-empty"><span className="neighbor-orb">⌂</span><p className="eyebrow">THE NEIGHBOR NETWORK</p><h1>الجيران يبدأون من مكتبك</h1><p>أنشئ مكتبك أولًا لتتمكن من اكتشاف الشركات وبناء علاقات عمل معها.</p><Link href="/" className="primary-button">إنشاء مكتب</Link></section></div></main>;
+ const active=own.find((c:any)=>c.slug===query.office)||own[0];
+ const {data:directory}=await supabase.from("companies").select("id,name,slug,description,logo_url,website_url,social_links").neq("id",active.id).order("created_at",{ascending:false}).limit(60);
+ const {data:requests}=await supabase.from("neighbor_requests").select("id,from_company_id,to_company_id,message,status,created_at,requested_by").or(`from_company_id.eq.${active.id},to_company_id.eq.${active.id}`).order("created_at",{ascending:false}).limit(50);
+ const requestRows=requests??[];const ids=[...new Set(requestRows.flatMap((r:any)=>[r.from_company_id,r.to_company_id]))];
+ const {data:companies}=ids.length?await supabase.from("companies").select("id,name,slug,logo_url").in("id",ids):{data:[]};
+ const companyMap=new Map((companies??[]).map((c:any)=>[c.id,c]));
+ const {data:meetings}=await supabase.from("neighbor_meetings").select("id,request_id,starts_at,duration_minutes,agenda,status,proposed_by").order("starts_at",{ascending:true}).limit(30);
+ const requestsWithMeetings=requestRows.map((r:any)=>({...r,other:companyMap.get(r.from_company_id===active.id?r.to_company_id:r.from_company_id),meeting:(meetings??[]).find((m:any)=>m.request_id===r.id)}));
+ const incoming=requestsWithMeetings.filter((r:any)=>r.to_company_id===active.id);
+ const outgoing=requestsWithMeetings.filter((r:any)=>r.from_company_id===active.id);
+ const fmt=(name:string)=>name?.slice(0,1)||"ج";
+ return <main className="neighbors-shell"><div className="neighbors-wrap">
+  <header className="neighbors-nav"><Link href="/" className="brand-lockup"><span className="brand-mark">◈</span><span>المكتب</span></Link><div><span className="neighbors-current">{active.name}</span><Link href={`/company/${active.slug}`} className="neighbor-nav-link">صفحة شركتي ↗</Link><Link href="/" className="neighbor-nav-link">مكاتبي</Link></div></header>
+  <section className="neighbors-hero"><div><p className="eyebrow">THE NEIGHBOR NETWORK</p><h1>علاقات عمل تبدأ<br/><em>من الجوار.</em></h1><p>اكتشف الشركات، تعرّف على خدماتها، ابدأ محادثة عمل، وحوّل التعارف إلى موعد حقيقي.</p><div className="neighbors-hero-stats"><span><b>{(directory??[]).length}</b> مكتبًا متاحًا</span><span><b>{outgoing.length+incoming.length}</b> طلب تواصل</span><span><b>{(meetings??[]).length}</b> موعدًا</span></div></div><div className="neighbors-hero-art"><div className="neighbor-art-center">◈<small>مكتبك</small></div><i className="neighbor-node node-a">✦</i><i className="neighbor-node node-b">⌂</i><i className="neighbor-node node-c">↗</i><i className="neighbor-orbit orbit-a"/><i className="neighbor-orbit orbit-b"/></div></section>
+  {(query.sent||query.updated||query.meeting)&&<div className="neighbor-notice">تم تنفيذ العملية بنجاح وتحديث مساحة الجيران.</div>}
+  {query.error&&<div className="neighbor-error">تعذر تنفيذ العملية. تأكد من البيانات وصلاحيات المكتب ثم حاول مجددًا.</div>}
+  <section className="neighbors-section"><div className="neighbors-section-title"><div><p className="eyebrow">DISCOVER</p><h2>اكتشف مكاتب جديدة</h2><p>شركات ومكاتب داخل شبكة «المكتب» يمكن أن تكون بداية تعاون جديد.</p></div><span className="neighbors-count">{(directory??[]).length} نتيجة</span></div>
+   <div className="neighbor-directory">{(directory??[]).map((c:any)=><article className="neighbor-company-card" key={c.id}><div className="neighbor-company-head"><span className="neighbor-company-logo">{c.logo_url?<img src={c.logo_url} alt=""/>:fmt(c.name)}</span><span className="neighbor-verified">ضمن شبكة المكتب</span></div><h3>{c.name}</h3><p>{c.description||"شركة من مجتمع المكتب. تواصل معها لاستكشاف فرص التعاون."}</p><div className="neighbor-company-links">{c.website_url?<a href={c.website_url} target="_blank" rel="noreferrer">الموقع الإلكتروني ↗</a>:<span>ملف شركة</span>}<Link href={`/company/${c.slug}`}>عرض الملف ↗</Link></div><form action={createNeighborRequest} className="neighbor-request-form"><input type="hidden" name="fromCompanyId" value={active.id}/><input type="hidden" name="toCompanyId" value={c.id}/><textarea name="message" required minLength={10} maxLength={1200} placeholder="عرّف بنفسك واكتب سبب رغبتك في التواصل..." /><button className="neighbor-connect-button">إرسال طلب تواصل <span>←</span></button></form></article>)}
+    {!(directory??[]).length&&<div className="neighbors-empty-inline">لا توجد مكاتب أخرى منشورة حاليًا. ستظهر هنا الشركات المنضمة إلى شبكة المكتب.</div>}
+   </div>
   </section>
+  <section className="neighbors-section"><div className="neighbors-section-title"><div><p className="eyebrow">CONNECTIONS</p><h2>طلبات التواصل</h2><p>تابع الطلبات الواردة والصادرة من مكتبك.</p></div></div>
+   <div className="neighbor-requests-grid"><div className="neighbor-request-panel"><h3>طلبات واردة <b>{incoming.length}</b></h3>{incoming.map((r:any)=><article className="neighbor-request-row" key={r.id}><div><strong>{r.other?.name||"مكتب"}</strong><p>{r.message}</p><small>{dateLabel(r.created_at)}</small></div><div className="neighbor-request-actions"><span className={`neighbor-status status-${r.status}`}>{r.status==="pending"?"بانتظار الرد":r.status==="accepted"?"مقبول":r.status==="declined"?"مرفوض":"ملغي"}</span>{r.status==="pending"&&<><form action={respondNeighborRequest}><input type="hidden" name="requestId" value={r.id}/><input type="hidden" name="status" value="accepted"/><button className="neighbor-accept">قبول</button></form><form action={respondNeighborRequest}><input type="hidden" name="requestId" value={r.id}/><input type="hidden" name="status" value="declined"/><button className="neighbor-decline">اعتذار</button></form></>}</div></article>)}{!incoming.length&&<p className="neighbor-no-data">لا توجد طلبات واردة حتى الآن.</p>}</div>
+   <div className="neighbor-request-panel"><h3>طلبات صادرة <b>{outgoing.length}</b></h3>{outgoing.map((r:any)=><article className="neighbor-request-row" key={r.id}><div><strong>{r.other?.name||"مكتب"}</strong><p>{r.message}</p><small>{dateLabel(r.created_at)}</small></div><span className={`neighbor-status status-${r.status}`}>{r.status==="pending"?"بانتظار الرد":r.status==="accepted"?"مقبول":r.status==="declined"?"مرفوض":"ملغي"}</span></article>)}{!outgoing.length&&<p className="neighbor-no-data">لم ترسل أي طلبات بعد.</p>}</div></div>
+  </section>
+  <section className="neighbors-section"><div className="neighbors-section-title"><div><p className="eyebrow">MEETINGS</p><h2>المواعيد والاجتماعات</h2><p>اقترح موعدًا بعد قبول طلب التواصل، وتابع تأكيده.</p></div></div><div className="neighbor-meetings-list">{requestsWithMeetings.filter((r:any)=>r.status==="accepted").map((r:any)=><article className="neighbor-meeting-row" key={r.id}><div><strong>{r.other?.name||"مكتب"}</strong><p>تنسيق اجتماع تعارف أو مناقشة فرصة تعاون.</p>{r.meeting&&<span className={`neighbor-status status-${r.meeting.status}`}>{r.meeting.status==="proposed"?"موعد مقترح":r.meeting.status==="confirmed"?"موعد مؤكد":"غير متاح"}</span>}</div>{r.meeting?<div className="meeting-date">{dateLabel(r.meeting.starts_at)}<small>{r.meeting.duration_minutes} دقيقة</small></div>:<form action={proposeNeighborMeeting} className="neighbor-meeting-form"><input type="hidden" name="requestId" value={r.id}/><label>اقترح موعدًا<input name="startsAt" type="datetime-local" required min={new Date(Date.now()+3600000).toISOString().slice(0,16)}/></label><input name="agenda" placeholder="موضوع اللقاء (اختياري)"/><button className="neighbor-connect-button">إرسال اقتراح موعد</button></form>}</article>)}{!requestsWithMeetings.some((r:any)=>r.status==="accepted")&&<p className="neighbor-no-data">ستظهر هنا الاجتماعات بعد قبول طلبات التواصل.</p>}</div></section>
+  <footer className="neighbors-footer">الجيران · شبكة علاقات الأعمال داخل المكتب</footer>
  </div></main>;
 }

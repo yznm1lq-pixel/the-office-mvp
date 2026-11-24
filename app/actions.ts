@@ -252,6 +252,18 @@ export async function proposeNeighborMeeting(formData: FormData) {
   redirect("/neighbors?meeting=proposed");
 }
 
+
+export async function respondNeighborMeeting(formData: FormData) {
+  const meetingId = textValue(formData, "meetingId");
+  const status = textValue(formData, "status");
+  if (!uuidPattern.test(meetingId) || !["confirmed","declined"].includes(status)) redirect("/neighbors?error=meeting-response");
+  const { supabase } = await signedInClient();
+  const { error } = await supabase.from("neighbor_meetings").update({ status }).eq("id", meetingId);
+  if (error) redirect("/neighbors?error=meeting-response");
+  revalidatePath("/neighbors");
+  redirect("/neighbors?meeting=updated");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

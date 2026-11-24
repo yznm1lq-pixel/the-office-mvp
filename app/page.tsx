@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createCompany, signOut } from "./actions";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { DashboardRefresh } from "@/components/dashboard-refresh";
@@ -20,6 +21,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     const { data } = await supabase.auth.getClaims();
     userEmail = typeof data?.claims?.email === "string" ? data.claims.email : null;
     userId = typeof data?.claims?.sub === "string" ? data.claims.sub : null;
+    if (userId) {
+      const { data: profile } = await supabase.from("profiles").select("full_name,username").eq("id", userId).maybeSingle();
+      if (!profile?.full_name || !profile?.username) redirect("/onboarding/profile?next=%2F");
+    }
     if (userEmail) {
       const { data: adminFlag } = await supabase.rpc("is_platform_admin");
       isPlatformAdmin = adminFlag === true;
@@ -89,7 +94,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <div className="mx-auto max-w-7xl">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 font-black text-xl"><span className="brand-mark">◈</span> المكتب</Link>
-          <div className="flex items-center gap-4">{isPlatformAdmin && <Link href="/platform-admin" className="secondary-button">إدارة المنصة</Link>}<span className="hidden text-sm text-slate-500 sm:block">{userEmail}</span><form action={signOut}><button className="text-sm font-semibold text-slate-500 hover:text-rose-600">تسجيل الخروج</button></form></div>
+          <nav className="office-main-nav"><Link href="/">مكاتبي</Link><Link href="/neighbors">الجيران</Link><Link href="/profile">ملفي الشخصي</Link>{isPlatformAdmin && <Link href="/platform-admin">إدارة المنصة</Link>}</nav><div className="flex items-center gap-3"><span className="hidden text-sm text-slate-500 sm:block">{userEmail}</span><form action={signOut}><button className="nav-link">خروج</button></form></div>
         </header>
 
         <section className="mt-9 flex flex-col justify-between gap-5 md:flex-row md:items-end">

@@ -25,11 +25,12 @@ export async function signUp(formData: FormData) {
   if (!fullName || !email || password.length < 8) redirect("/login?error=signup");
   const supabase = await createClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://the-office-mvp.vercel.app";
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email, password,
     options: { data: { full_name: fullName }, emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}` },
   });
   if (error) redirect("/login?error=signup");
+  if (data.session) redirect(next);
   redirect(`/login?message=check-email&next=${encodeURIComponent(next)}`);
 }
 
@@ -53,7 +54,7 @@ export async function signUpFromInvitation(formData: FormData) {
   const supabase = await createClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://the-office-mvp.vercel.app";
   const next = `/invite/${encodeURIComponent(token)}`;
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email, password,
     options: {
       data: { full_name: fullName },
@@ -61,5 +62,6 @@ export async function signUpFromInvitation(formData: FormData) {
     },
   });
   if (error) redirect(`/invite/${encodeURIComponent(token)}?error=signup`);
+  if (data.session) redirect(next);
   redirect(`/invite/${encodeURIComponent(token)}?message=check-email`);
 }

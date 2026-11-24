@@ -456,3 +456,34 @@ label{color:#4d594d}
 .avatar-cover{width:100%;height:100%;object-fit:cover;border-radius:50%}
 @media(max-width:950px){.vintage-appbar,.neighbors-vintage-nav{flex-wrap:wrap}.vintage-appbar .office-main-nav{order:3;flex-basis:100%;justify-content:flex-start}.neighbor-building-hero{grid-template-columns:1fr 1fr}.floor-room-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto}.architectural-floor{min-height:750px}.office-people-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.map-doors-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.app-shell{padding:14px}.office-main-nav{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;width:100%}.office-main-nav a{white-space:nowrap;padding:8px}.vintage-office-shell,.neighbors-vintage-shell{padding:12px}.vintage-office-title{align-items:flex-start;flex-direction:column;margin:25px 0 18px}.floor-overview-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.floor-open-hours{grid-column:1/-1}.floor-overview-strip>div{border-bottom:1px solid #ded6c6}.office-floor-layout,.office-team-board{padding:13px}.floor-board-heading{align-items:flex-start;flex-direction:column}.architectural-floor{min-height:0;padding:36px 12px 58px;border-width:7px}.floor-room-grid{grid-template-columns:1fr;grid-template-rows:auto;gap:12px;padding-top:22px}.floor-office-room{min-height:175px}.floor-meeting-room,.floor-reception,.floor-lounge{min-height:150px}.floor-corridor{left:2%;right:2%;gap:8px}.floor-corridor small{display:none}.floor-map-legend{gap:10px}.floor-map-legend small{flex-basis:100%}.office-people-grid,.office-shortcuts{grid-template-columns:1fr 1fr}.office-person-card{padding:10px;gap:8px}.person-card-avatar{width:39px;height:39px}.office-person-card h3{font-size:11px}.office-person-card p,.office-person-card small{font-size:9px}.neighbor-building-hero{grid-template-columns:1fr;padding:30px 0}.neighbor-building-sketch{min-height:260px}.neighbor-floor-map{padding:12px 12px 0;border-width:6px}.map-doors-grid{grid-template-columns:1fr;gap:12px;padding:15px 0}.neighbor-door-card{padding:12px}.door-frame{height:128px;max-width:300px}.map-corridor{margin:0 -12px;gap:10px;flex-wrap:wrap}.map-corridor small{flex-basis:100%;text-align:center}.neighbor-activity-grid{grid-template-columns:1fr}.neighbor-activity-row{align-items:flex-start;flex-direction:column}.neighbor-meeting-card{align-items:flex-start;flex-direction:column}.neighbor-meeting-form{width:100%}.neighbor-meeting-form input{max-width:100%}.profile-identity-card{align-items:flex-start;flex-direction:column}.profile-fields-grid{grid-template-columns:1fr}.profile-emoji-grid{grid-template-columns:repeat(6,minmax(0,1fr))}.office-space-picker{grid-template-columns:1fr}.office-space-option{gap:9px}.onboarding-shell{padding:16px 12px}.onboarding-intro{padding:28px 0 15px}.profile-save{width:100%}.floor-stamp,.neighbor-floor-chip{align-self:flex-start}.neighbor-building-hero h1{font-size:43px}}
+
+/* Public company profile — heritage brochure */
+.public-company-shell{min-height:100vh;padding:18px 22px 50px;background:radial-gradient(ellipse at top,#fffdf7,transparent 40rem),#eeeae0;color:#29352d}
+.public-company-nav{display:flex;align-items:center;justify-content:space-between;width:min(1120px,100%);margin:auto;padding:12px 0 18px;border-bottom:1px solid #d5cdbd}
+.public-company-hero{position:relative;display:flex;flex-direction:column;align-items:center;width:min(900px,100%);margin:45px auto 25px;padding:48px 34px;border:1px solid #d7cfbf;background:#faf8f0;text-align:center;box-shadow:0 8px 30px #493b250d}
+.public-company-glow{position:absolute;inset:10px;border:1px solid #e4dccb;pointer-events:none}
+.public-company-identity{position:relative;display:flex;width:100px;height:100px;align-items:center;justify-content:center;overflow:hidden;border:5px solid #fffdf7;border-radius:50%;background:#e6e8dd;box-shadow:0 0 0 1px #cfc4ae;color:#405b49;font-size:38px}
+.public-company-identity img{width:100%;height:100%;object-fit:cover}
+.public-company-hero .eyebrow{margin-top:22px}
+.public-company-hero h1{margin:10px 0;font-size:clamp(34px,5vw,54px);font-weight:900}
+.public-company-description{max-width:620px;color:#7d8176;font-size:14px;line-height:2}
+.public-company-actions{display:flex;gap:10px;margin:22px 0}
+.neighbor-cta{display:flex;align-items:center;justify-content:space-between;gap:20px;width:min(680px,100%);margin-top:20px;padding:18px;border:1px solid #d5cbb8;background:#eeece1;text-align:right}
+.neighbor-cta>div{display:flex;align-items:center;gap:12px}.neighbor-cta>div>span{font-size:25px}
+.neighbor-cta strong{font-size:13px}.neighbor-cta p{margin-top:4px;color:#7d8176;font-size:10px}
+.neighbor-cta>a{color:#405b49;font-size:11px;font-weight:900;white-space:nowrap}
+.public-company-section{width:min(1000px,100%);margin:30px auto;padding:28px;border:1px solid #d7cfbf;background:#faf8f0}
+.public-company-section h2{margin:7px 0 18px;font-size:24px;font-weight:900}
+.public-section-heading{display:flex;align-items:end;justify-content:space-between}
+.public-section-heading>span{color:#8c7042;font-size:11px}
+.public-socials{display:flex;gap:10px;flex-wrap:wrap}
+.public-socials a{padding:10px 14px;border:1px solid #d8d0c0;background:#f5f1e7;color:#405b49;font-size:11px}
+.public-portfolio-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.public-portfolio-card{overflow:hidden;border:1px solid #ded6c6;background:#f7f4eb}
+.public-portfolio-card>img{width:100%;height:170px;object-fit:cover}
+.portfolio-placeholder{display:grid;height:170px;place-items:center;background:#e8e4d8;color:#8c7042;font-size:34px}
+.public-portfolio-card>div:last-child{padding:15px}
+.public-portfolio-card h3{font-size:14px;font-weight:900}.public-portfolio-card p{margin:7px 0;color:#7d8176;font-size:11px;line-height:1.8}
+.public-portfolio-card a{color:#405b49;font-size:10px;font-weight:900}
+.public-company-footer{padding:28px;text-align:center;color:#9a927f;font-size:10px}
+@media(max-width:640px){.public-company-shell{padding:12px}.public-company-hero{padding:35px 17px;margin-top:25px}.neighbor-cta{align-items:flex-start;flex-direction:column}.public-company-section{padding:17px}.public-portfolio-grid{grid-template-columns:1fr}}

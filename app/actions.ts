@@ -55,8 +55,24 @@ export async function createInvitation(formData: FormData) {
     p_company_id: companyId, p_email: email, p_role: role, p_department_id: departmentId,
   });
   if (error || !token) redirect(`/offices/${companyId}/team?error=invite`);
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.INVITATION_FROM_EMAIL;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+  if (!apiKey || !from || !baseUrl) redirect(`/offices/${companyId}/team?error=email-config`);
+  const invitationUrl = `${baseUrl}/invite/${encodeURIComponent(token)}`;
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from,
+      to: [email],
+      subject: "دعوة للانضمام إلى مساحة عمل",
+      html: `<div dir="rtl" style="font-family:Arial,sans-serif;max-width:560px;margin:40px auto;padding:32px;border:1px solid #e5e2d8;border-radius:12px;color:#29352d"><h2>أنت مدعو للانضمام إلى فريق العمل</h2><p>تمت دعوتك للانضمام إلى مساحة الشركة. اضغط الزر أدناه لإكمال انضمامك.</p><p style="margin:28px 0"><a href="${invitationUrl}" style="background:#405d4d;color:white;padding:13px 22px;border-radius:7px;text-decoration:none">قبول الدعوة والانضمام</a></p><p style="color:#777;font-size:12px">إذا لم تكن تتوقع هذه الدعوة، يمكنك تجاهل الرسالة.</p></div>`,
+    }),
+  });
+  if (!response.ok) redirect(`/offices/${companyId}/team?error=email-send`);
   revalidatePath(`/offices/${companyId}/team`);
-  redirect(`/offices/${companyId}/team?inviteToken=${encodeURIComponent(token)}`);
+  redirect(`/offices/${companyId}/team?sent=1`);
 }
 
 export async function acceptInvitation(formData: FormData) {

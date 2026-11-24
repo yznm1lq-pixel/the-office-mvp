@@ -23,13 +23,15 @@ async function signedInClient() {
 
 export async function createCompany(formData: FormData) {
   const name = textValue(formData, "companyName");
-  if (name.length < 2 || name.length > 80) redirect("/?error=company-name");
+  const spaceId = textValue(formData, "spaceId");
+  if (name.length < 2 || name.length > 80 || !uuidPattern.test(spaceId)) redirect("/?error=company-name");
   const { supabase, userId } = await signedInClient();
   const { data: profile } = await supabase.from("profiles").select("full_name,username").eq("id",userId).maybeSingle();
   if (!profile?.full_name || !profile?.username) redirect("/onboarding/profile?next=%2F");
-  const { data: companyId, error } = await supabase.rpc("create_company", { company_name: name });
+  const { data: companyId, error } = await supabase.rpc("create_company_with_space", { company_name: name, p_space_id: spaceId });
   if (error) {
     if (error.message.includes("COMPANY_LIMIT_REACHED")) redirect("/?error=company-limit");
+    if (error.message.includes("SPACE_UNAVAILABLE")) redirect("/?error=space-unavailable");
     redirect("/?error=company-create");
   }
   if (!companyId) redirect("/?error=company-create");

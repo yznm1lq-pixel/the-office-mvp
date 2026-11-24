@@ -7,6 +7,7 @@ import { DashboardRefresh } from "@/components/dashboard-refresh";
 
 type Company = { id: string; name: string; slug: string; created_at: string };
 type OfficeStats = Company & { employees: number; activeEmployees: number };
+type OfficeSpace = {id:string;floor_number:number;door_number:string;area_sqm:number;tier:string;rent_label:string};
 
 export default async function HomePage({ searchParams }: { searchParams: Promise<{ error?: string; department?: string }> }) {
   const params = await searchParams;
@@ -15,6 +16,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   let userId: string | null = null;
   let isPlatformAdmin = false;
   let offices: OfficeStats[] = [];
+  let spaces: OfficeSpace[] = [];
 
   if (configured) {
     const supabase = await createClient();
@@ -102,7 +104,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <span className="rounded-full border border-violet-100 bg-violet-50 px-4 py-2 text-xs font-bold text-violet-700">الباقة المجانية · مكتب واحد</span>
         </section>
 
-        {params.error === "company-limit" && <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">وصلت إلى الحد المسموح في الباقة المجانية. يمكنك إدارة مكاتبك الحالية من هذه الصفحة.</div>}
+        {params.error === "space-unavailable" && <div className="notice notice-error">هذا المكتب تم حجزه للتو. اختر موقعًا آخر.</div>}{params.error === "company-limit" && <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">وصلت إلى الحد المسموح في الباقة المجانية. يمكنك إدارة مكاتبك الحالية من هذه الصفحة.</div>}
         {params.error && params.error !== "company-limit" && <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">لم نتمكن من إكمال العملية. حاول مرة أخرى.</div>}
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -125,7 +127,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           ) : <div className="empty-state"><span className="text-3xl">◈</span><h3 className="mt-3 font-black">لم تنشئ مكتبك بعد</h3><p className="mt-2 text-sm text-slate-500">ابدأ بإنشاء مساحة عملك الأولى.</p></div>}
         </section>
 
-        {officeCount === 0 && <section className="mt-7 rounded-3xl border border-violet-100 bg-white p-6 md:p-8"><div className="max-w-xl"><h2 className="text-xl font-black">ابدأ مساحة عملك</h2><p className="mt-2 text-sm leading-7 text-slate-500">أنشئ شركتك لتصبح رئيسها، أو افتح رابط دعوة وصلك من مدير شركتك للانضمام كموظف.</p><form action={createCompany} className="mt-5 flex flex-col gap-3 sm:flex-row"><input className="field flex-1" name="companyName" placeholder="اسم الشركة أو الفريق" minLength={2} maxLength={80} required /><button className="primary-button whitespace-nowrap" type="submit">إنشاء المكتب</button></form></div></section>}
+        {officeCount === 0 && <section className="mt-7 rounded-3xl border border-violet-100 bg-white p-6 md:p-8"><div className="max-w-xl"><h2 className="text-xl font-black">ابدأ مساحة عملك</h2><p className="mt-2 text-sm leading-7 text-slate-500">أنشئ شركتك لتصبح رئيسها، أو افتح رابط دعوة وصلك من مدير شركتك للانضمام كموظف.</p><form action={createCompany} className="mt-5 grid gap-5"><label>اسم الشركة أو الفريق<input className="field mt-2" name="companyName" placeholder="مثال: شركة الأفق" minLength={2} maxLength={80} required /></label><div><div className="mb-3 flex items-center justify-between"><strong className="text-sm">اختر موقع مكتبك في المبنى</strong><span className="text-xs text-stone-500">{spaces.length} مواقع متاحة</span></div><div className="office-space-picker">{spaces.map((space)=><label className="office-space-option" key={space.id}><input type="radio" name="spaceId" value={space.id} required/><span className="space-door-no">{space.door_number}</span><span className="space-option-copy"><b>الطابق {space.floor_number} · مكتب {space.door_number}</b><small>{space.area_sqm} م² · {space.tier==="corner"?"زاوية مميزة":space.tier==="premium"?"مساحة مميزة":"مكتب قياسي"}</small></span><span className="space-option-price">{space.rent_label}</span></label>)}</div></div><button className="primary-button whitespace-nowrap" type="submit" disabled={!spaces.length}>تأكيد الموقع وإنشاء المكتب</button></form></div></section>}
         <p className="mt-10 text-center text-xs text-slate-400">يتم تحديث مؤشرات النشاط تلقائيًا كل 30 ثانية.</p>
       </div>
     </main>

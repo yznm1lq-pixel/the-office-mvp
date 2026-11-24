@@ -57,6 +57,8 @@ begin
     raise exception 'Company name must be between 2 and 80 characters';
   end if;
 
+  perform pg_advisory_xact_lock(hashtextextended(v_user_id::text, 0));
+
   select count(*) into v_company_count
   from public.companies c
   where c.created_by = v_user_id;

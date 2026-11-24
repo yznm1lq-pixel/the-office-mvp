@@ -71,7 +71,7 @@ export async function updateMemberRole(formData: FormData) {
   if (!uuidPattern.test(companyId) || !uuidPattern.test(userId)) redirect("/");
   const { supabase } = await signedInClient();
   const { error } = await supabase.from("company_members").update({
-    role, department_id: role === "department_head" ? departmentId : null,
+    role, department_id: departmentId,
   }).eq("company_id", companyId).eq("user_id", userId);
   if (error) redirect(`/offices/${companyId}/team?error=permissions`);
   revalidatePath(`/offices/${companyId}/team`);

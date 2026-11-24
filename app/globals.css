@@ -25,7 +25,7 @@ button { cursor: pointer; }
 ::selection { background: #dcd8ff; color: #30266f; }
 
 .surface {
-  background: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.9);
   border: 1px solid rgba(230,232,240,.9);
   box-shadow: 0 18px 60px rgba(33,39,68,.06);
   backdrop-filter: blur(16px);
@@ -38,7 +38,79 @@ button { cursor: pointer; }
 }
 .primary-button:hover { background: var(--violet-dark); transform: translateY(-1px); }
 .field {
-  width: 100%; border: 1px solid var(--line); border-radius: 12px;
+  width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 12px;
   padding: 13px 14px; background: #fff; outline: none;
 }
 .field:focus { border-color: #958ce8; box-shadow: 0 0 0 3px rgba(101,88,211,.10); }
+
+.brand-mark {
+  display: inline-flex; width: 42px; height: 42px; align-items: center; justify-content: center;
+  border-radius: 14px; color: #fff; background: linear-gradient(145deg,#6558d3,#403779);
+  box-shadow: 0 8px 20px rgba(101,88,211,.2); font-size: 20px; font-weight: 900;
+}
+.stat-card {
+  min-width: 0; border: 1px solid #e9eaf2; border-radius: 22px; background: rgba(255,255,255,.92);
+  padding: 21px; box-shadow: 0 12px 32px rgba(33,39,68,.035);
+}
+.stat-icon {
+  display: inline-flex; width: 34px; height: 34px; align-items: center; justify-content: center;
+  border-radius: 11px; background: #f0eeff; color: #6558d3; font-size: 16px;
+}
+.stat-icon-live { background: #e9f8ef; color: #159653; font-size: 10px; }
+.office-card {
+  display: block; min-width: 0; border: 1px solid #e8eaf0; border-radius: 24px; background: #fff;
+  padding: 22px; box-shadow: 0 12px 32px rgba(33,39,68,.04);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.office-card:hover { transform: translateY(-2px); border-color: #d2cdfa; box-shadow: 0 18px 42px rgba(64,55,121,.09); }
+.office-card-mark {
+  display: inline-flex; width: 46px; height: 46px; flex: 0 0 auto; align-items: center; justify-content: center;
+  border-radius: 15px; background: #f0eeff; color: #6558d3; font-size: 22px;
+}
+.status-live, .status-idle {
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+  border-radius: 999px; padding: 7px 10px; font-size: 11px; font-weight: 700;
+}
+.status-live { background: #eaf8ef; color: #16834a; }
+.status-idle { background: #f2f3f6; color: #7b8496; }
+.status-live i, .status-idle i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.empty-state {
+  display: flex; min-height: 190px; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px dashed #d8d4f4; border-radius: 22px; background: rgba(255,255,255,.7); text-align: center; padding: 24px;
+}
+.setup-step { display: flex; align-items: center; gap: 12px; color: #647084; }
+.setup-step > span {
+  display: inline-flex; width: 31px; height: 31px; flex: 0 0 auto; align-items: center; justify-content: center;
+  border: 1px solid #e4e6ed; border-radius: 50%; background: #fff; color: #81899a; font-size: 12px; font-weight: 800;
+}
+.setup-step-done { color: #28234f; }
+.setup-step-done > span { border-color: #d8f0e1; background: #eaf8ef; color: #16834a; }
+.office-hero-art {
+  position: relative; min-height: 340px; overflow: hidden; border: 1px solid #e6e2fa; border-radius: 30px;
+  background: radial-gradient(ellipse at 50% 45%,#e9e6ff 0%,#f5f4ff 50%,#fbfbfe 100%);
+}
+.office-art-grid {
+  position: absolute; inset: 0; opacity: .45;
+  background-image: linear-gradient(30deg,#d8d5f0 1px,transparent 1px),linear-gradient(150deg,#d8d5f0 1px,transparent 1px);
+  background-size: 34px 20px;
+}
+.office-art-floor {
+  position: absolute; left: 50%; top: 50%; display: flex; width: min(76%,390px); height: 170px;
+  align-items: center; justify-content: space-evenly; transform: translate(-50%,-50%) rotate(-8deg) skewY(8deg);
+  border: 1px solid #bdb5ee; border-radius: 24px; background: linear-gradient(135deg,#d9d5fb,#bcb4ef);
+  box-shadow: 0 28px 50px rgba(79,68,159,.18);
+}
+.office-art-floor span {
+  display: flex; width: 58px; height: 58px; align-items: center; justify-content: center; border: 3px solid white;
+  border-radius: 18px; background: white; color: #6558d3; box-shadow: 0 9px 20px rgba(54,47,115,.13); font-size: 24px;
+}
+.office-art-label {
+  position: absolute; bottom: 24px; right: 24px; border: 1px solid #fff; border-radius: 999px;
+  background: rgba(255,255,255,.8); padding: 9px 15px; color: #5145bc; font-size: 12px; font-weight: 700;
+}
+@media (max-width: 640px) {
+  .office-hero-art { min-height: 270px; }
+  .office-art-floor { height: 135px; }
+  .office-art-floor span { width: 46px; height: 46px; border-radius: 14px; }
+  .office-card { padding: 17px; }
+}

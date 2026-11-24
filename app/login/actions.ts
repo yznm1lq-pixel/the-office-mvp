@@ -12,8 +12,7 @@ export async function signIn(formData: FormData) {
   const next = safeNext(value(formData, "next"));
   if (!username || !password) redirect("/login?error=missing");
   const supabase = await createClient();
-  const { data: resolved } = await supabase.rpc("resolve_username_login", { p_username: username });
-  const email = typeof resolved === "string" ? resolved : (username.includes("@") ? username : null);
+  const email = username.includes("@") ? username : `${username}@accounts.theoffice.invalid`;
   if (!email) redirect("/login?error=credentials");
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect("/login?error=credentials");

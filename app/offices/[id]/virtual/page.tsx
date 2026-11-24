@@ -1,52 +1,43 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { PresenceHeartbeat } from "@/components/presence-heartbeat";
-import { VirtualOfficeControls } from "@/components/virtual-office-controls";
-import { signOut } from "@/app/actions";
-
+import {notFound,redirect} from "next/navigation";
+import {createClient} from "@/lib/supabase/server";
+import {PresenceHeartbeat} from "@/components/presence-heartbeat";
+import {signOut} from "@/app/actions";
 type Props={params:Promise<{id:string}>;searchParams:Promise<{joined?:string}>};
 export default async function VirtualOfficePage({params,searchParams}:Props){
- const {id}=await params;const query=await searchParams;const supabase=await createClient();
- const {data:auth}=await supabase.auth.getClaims();const userId=auth?.claims?.sub;if(!userId)redirect("/login");
+ const {id}=await params;const q=await searchParams;const supabase=await createClient();const {data:auth}=await supabase.auth.getClaims();const userId=auth?.claims?.sub;if(!userId)redirect("/login");
  const [company,membership,departments,members,presence,projects,tasks]=await Promise.all([
   supabase.from("companies").select("id,name,description,logo_url,slug").eq("id",id).maybeSingle(),
   supabase.from("company_members").select("role,department_id").eq("company_id",id).eq("user_id",userId).maybeSingle(),
   supabase.from("departments").select("id,name,color").eq("company_id",id).order("created_at"),
-  supabase.from("company_members").select("user_id,role,department_id,profiles(full_name,avatar_url)").eq("company_id",id).order("joined_at"),
-  supabase.from("office_presence").select("user_id,last_seen_at").eq("company_id",id).gte("last_seen_at",new Date(Date.now()-5*60*1000).toISOString()),
+  supabase.from("company_members").select("user_id,role,department_id,profiles(full_name,username,avatar_url,job_title)").eq("company_id",id).order("joined_at"),
+  supabase.from("office_presence").select("user_id,last_seen_at").eq("company_id",id).gte("last_seen_at",new Date(Date.now()-300000).toISOString()),
   supabase.from("projects").select("id,status").eq("company_id",id),
-  supabase.from("tasks").select("id,status").eq("company_id",id),
+  supabase.from("tasks").select("id,status").eq("company_id",id)
  ]);
  if(!company.data||!membership.data)notFound();
- const office=company.data;const people=members.data??[];const live=new Set((presence.data??[]).map(p=>p.user_id));
- const departmentsList=departments.data??[];const projectsList=projects.data??[];const tasksList=tasks.data??[];
+ const office=company.data;const people=members.data??[];const live=new Set((presence.data??[]).map(p=>p.user_id));const depts=departments.data??[];
+ const label=(m:any)=>Array.isArray(m.profiles)?m.profiles[0]:m.profiles;
  const roleNames:Record<string,string>={owner:"رئيس الشركة",admin:"مدير الشركة",department_head:"مدير قسم",member:"موظف"};
- return <main className="virtual-shell"><PresenceHeartbeat companyId={id}/><div className="virtual-wrap">
-  <header className="virtual-topbar"><Link href="/" className="brand-lockup"><span className="brand-mark">◈</span><span>المكتب</span></Link><div className="virtual-nav"><Link href={`/offices/${id}/work`}>مساحة العمل</Link><Link href={`/offices/${id}/team`}>الفريق</Link><Link href={`/offices/${id}/settings`}>الإعدادات</Link><Link href={`/offices/${id}/announcements`}>الإعلانات</Link><Link href={`/offices/${id}/chat`}>المحادثات</Link><Link href="/profile">ملفي</Link><Link href={`/company/${office.slug}`}>صفحة الشركة</Link><form action={signOut}><button>خروج</button></form></div></header>
-  {query.joined&&<div className="notice notice-success">أهلًا بك في المكتب! تم قبول دعوتك بنجاح.</div>}
-  <section className="virtual-heading"><div><p className="eyebrow">مساحتكم الرقمية</p><h1>{office.name}</h1><p>{office.description||"مساحة تجمع فريقكم، أقسامكم وأعمالكم في مكان واحد."}</p></div><div className="virtual-live-pill"><i/> {live.size} متصل الآن</div></section>
-  <section className="virtual-dashboard">
-   <div className="virtual-floor-panel">
-    <div className="floor-label"><div><span className="eyebrow">FLOOR PLAN / LIVE OFFICE</span><h2>المكتب الافتراضي</h2></div><span className="floor-chip">مخطط الطابق</span></div>
-    <div className="office-plan-scene"><div className="office-plan-building">
-      {departmentsList.slice(0,4).map((d:any)=><section className="office-room" key={d.id}><h3>{d.name}</h3><div className="office-room-desks">{people.filter((m:any)=>m.department_id===d.id).slice(0,6).map((m:any)=>{const profile=Array.isArray(m.profiles)?m.profiles[0]:m.profiles;return <div className="office-desk" key={m.user_id}><i/><span>{profile?.full_name??"موظف"}</span></div>})}{people.filter((m:any)=>m.department_id===d.id).length===0&&<div className="office-desk is-empty"><i/><span>مقعد شاغر</span></div>}</div></section>)}
-      {departmentsList.length===0&&<section className="office-room"><h3>المساحة الرئيسية</h3><div className="office-room-desks">{people.slice(0,6).map((m:any)=>{const profile=Array.isArray(m.profiles)?m.profiles[0]:m.profiles;return <div className="office-desk" key={m.user_id}><i/><span>{profile?.full_name??"موظف"}</span></div>})}</div></section>}
-      <div className="office-plan-lounge">منطقة الاستقبال والاجتماعات</div><div className="office-plan-entry"/>
-    </div><div className="office-plan-caption"><span>مخطط علوي للمكتب · توزيع فعلي للمقاعد والأقسام</span><span>المقاعد الخضراء: الفريق</span></div></div>
-    <div className="floor-legend"><span><i className="legend-online"/> متصل الآن</span><span><i className="legend-offline"/> غير متصل</span><span>تتحدث حالة الحضور تلقائيًا</span></div>
+ const renderAvatar=(p:any)=>p?.avatar_url?.startsWith("http")?<img src={p.avatar_url} alt=""/>:<span>{p?.avatar_url||"🙂"}</span>;
+ return <main className="vintage-office-shell"><PresenceHeartbeat companyId={id}/><div className="vintage-office-wrap">
+  <header className="vintage-appbar"><Link href="/" className="brand-lockup"><span className="brand-mark">◈</span><span>المكتب</span></Link><nav className="office-main-nav"><Link href="/">مكاتبي</Link><Link href="/neighbors">الجيران</Link><Link href={`/offices/${id}/virtual`} className="active">المكتب الافتراضي</Link><Link href={`/offices/${id}/work`}>الأعمال</Link><Link href={`/offices/${id}/team`}>الفريق</Link><Link href={`/offices/${id}/announcements`}>الإعلانات</Link><Link href={`/offices/${id}/chat`}>المحادثة</Link><Link href="/profile">ملفي</Link></nav><form action={signOut}><button className="vintage-text-link">خروج</button></form></header>
+  {q.joined&&<div className="notice notice-success">مرحبًا بك في فريق {office.name}.</div>}
+  <section className="vintage-office-title"><div><span className="eyebrow">THE OFFICE · YOUR FLOOR</span><h1>{office.name}</h1><p>{office.description||"مساحة فريقك، بتفاصيلها وأقسامها وأماكن اللقاء."}</p></div><div className="office-presence-card"><i/><strong>{live.size}</strong><span>متصل الآن</span></div></section>
+  <section className="floor-overview-strip"><div><small>أعضاء المكتب</small><strong>{people.length}</strong></div><div><small>الأقسام</small><strong>{depts.length}</strong></div><div><small>المشاريع</small><strong>{projects.data?.length??0}</strong></div><div><small>المهام</small><strong>{tasks.data?.length??0}</strong></div><div className="floor-open-hours"><span>الطابق الأول</span><b>مخطط المكتب الداخلي</b></div></section>
+  <section className="office-floor-layout"><div className="floor-board-heading"><div><span className="eyebrow">01 / FLOOR PLAN</span><h2>مخطط الطابق</h2><p>الممر الرئيسي يربط الأقسام والاستقبال وغرف الاجتماعات.</p></div><span className="floor-stamp">THE OFFICE · EST. 2026</span></div>
+   <div className="architectural-floor"><div className="floor-exterior-label">الواجهة الشرقية · المدخل الرئيسي</div><div className="floor-entry"><span>المدخل</span><i>⌂</i></div>
+    <div className="floor-room-grid">
+     {(depts.length?depts:[{id:"main",name:"المساحة المشتركة",color:"#637b62"}]).map((d:any,index:number)=>{const group=people.filter((m:any)=>m.department_id===d.id);const membersForRoom=group.length?group:(!depts.length?people:[]);return <article className={`floor-office-room room-${index%4+1}`} key={d.id}><div className="room-header"><span>مكتب {String(index+1).padStart(2,"0")}</span><h3>{d.name}</h3></div><div className="room-window-line"/><div className="room-desk-grid">{membersForRoom.slice(0,8).map((m:any)=>{const p=label(m);return <div className="room-workstation" key={m.user_id}><div className={`workstation-person ${live.has(m.user_id)?"person-online":""}`}>{renderAvatar(p)}<i/></div><div className="workstation-desk"><span/><b/></div><small>{p?.full_name||"عضو الفريق"}</small></div>})}{!membersForRoom.length&&<div className="room-vacancy"><span>＋</span><small>مقاعد شاغرة</small></div>}</div><div className="room-door"><span>باب القسم</span></div></article>})}
+     <article className="floor-meeting-room"><span className="room-kicker">MEETING ROOM</span><h3>غرفة الاجتماعات</h3><div className="meeting-table"><i/><i/><i/><i/><span/></div><small>اجتماع الفريق · نقاش · تخطيط</small></article>
+     <article className="floor-reception"><span className="room-kicker">RECEPTION</span><h3>الاستقبال</h3><div className="reception-counter">◈ <small>{office.name}</small></div><span className="plant plant-one">✿</span><span className="plant plant-two">✿</span></article>
+     <article className="floor-lounge"><span className="room-kicker">LOUNGE</span><h3>استراحة الفريق</h3><div className="lounge-furniture"><span/><i/><b/></div><small>مساحة غير رسمية للقاءات السريعة</small></article>
+    </div><div className="floor-corridor"><span>الممر الرئيسي</span><i/><b/><i/><b/><i/></div><div className="floor-exterior-label floor-bottom-label">الواجهة الغربية · منطقة العمل</div>
    </div>
-   <aside className="virtual-side">
-    <section className="virtual-side-card"><div className="side-card-title"><div><h3>الفريق داخل المكتب</h3><p>{people.length} أعضاء</p></div><Link href={`/offices/${id}/team`}>إدارة الفريق ←</Link></div>
-     <div className="virtual-people">{people.map((m:any)=>{const profile=Array.isArray(m.profiles)?m.profiles[0]:m.profiles;return <div className="virtual-person" key={m.user_id}><div className="virtual-avatar">{profile?.avatar_url?<img src={profile.avatar_url} alt=""/>:(profile?.full_name??"ع").slice(0,1)}<i className={live.has(m.user_id)?"is-online":""}/></div><div><strong>{profile?.full_name??"عضو الفريق"}</strong><small>{roleNames[m.role]??m.role}</small></div><span className={live.has(m.user_id)?"presence-text online":"presence-text"}>{live.has(m.user_id)?"متصل":"غير متصل"}</span></div>})}</div>
-    </section>
-    <section className="virtual-side-card"><div className="side-card-title"><div><h3>مساحات الأقسام</h3><p>تنظيم الفريق حسب التخصص</p></div><Link href={`/offices/${id}/settings`}>تعديل</Link></div>
-     <div className="virtual-departments">{departmentsList.map(d=><div key={d.id}><i style={{background:d.color}}/><span>{d.name}</span><b>{people.filter((m:any)=>m.department_id===d.id).length}</b></div>)}</div>
-    </section>
-   </aside>
+   <div className="floor-map-legend"><span><i className="legend-live"/> متصل الآن</span><span><i className="legend-away"/> غير متصل</span><span><i className="legend-door"/> مدخل القسم</span><small>يتم تحديث الحضور تلقائيًا أثناء وجود العضو في المكتب.</small></div>
   </section>
-  <VirtualOfficeControls companyId={id} departments={departmentsList.map((d:any)=>({id:d.id,name:d.name,color:d.color}))} people={people.map((m:any)=>{const profile=Array.isArray(m.profiles)?m.profiles[0]:m.profiles;return {userId:m.user_id,name:profile?.full_name??"عضو الفريق",role:roleNames[m.role]??m.role,departmentId:m.department_id,online:live.has(m.user_id),avatarUrl:profile?.avatar_url??null};})}/>
-  <section className="virtual-quick-stats"><Link href={`/offices/${id}/work`}><span>◫</span><div><small>المشاريع</small><strong>{projectsList.length}</strong></div><b>فتح مساحة العمل ←</b></Link><Link href={`/offices/${id}/work`}><span>✓</span><div><small>المهام</small><strong>{tasksList.length}</strong></div><b>متابعة الإنجاز ←</b></Link><Link href={`/offices/${id}/settings`}><span>✦</span><div><small>هوية المكتب</small><strong>إعدادات الشركة</strong></div><b>تخصيص ←</b></Link></section>
-  <footer className="virtual-footer">مساحة عملكم، أينما كان فريقكم · المكتب الافتراضي</footer>
+  <section className="office-team-board"><div className="floor-board-heading"><div><span className="eyebrow">02 / THE PEOPLE</span><h2>أهل المكتب</h2><p>كل عضو يظهر بشخصيته وصورته التي اختارها.</p></div><Link href={`/offices/${id}/team`} className="vintage-outline-button">إدارة الفريق ←</Link></div><div className="office-people-grid">{people.map((m:any)=>{const p=label(m);return <article className="office-person-card" key={m.user_id}><div className="person-card-avatar">{renderAvatar(p)}<i className={live.has(m.user_id)?"is-online":""}/></div><div><h3>{p?.full_name||"عضو الفريق"}</h3><p>{p?.job_title||roleNames[m.role]||"عضو"}</p><small>@{p?.username||"member"}</small></div><span className={live.has(m.user_id)?"person-status online":"person-status"}>{live.has(m.user_id)?"متصل":"غير متصل"}</span></article>})}</div></section>
+  <section className="office-shortcuts"><Link href={`/offices/${id}/work`}><span>01</span><b>المشاريع والمهام</b><small>مساحة إنجاز الفريق</small></Link><Link href={`/offices/${id}/chat`}><span>02</span><b>محادثة المكتب</b><small>تواصل يومي مباشر</small></Link><Link href={`/offices/${id}/announcements`}><span>03</span><b>لوحة الإعلانات</b><small>أخبار الشركة والجيران</small></Link><Link href="/neighbors"><span>04</span><b>الجيران</b><small>اكتشف المكاتب المجاورة</small></Link></section>
+  <footer className="vintage-office-footer">المكتب · مساحة عمل تنبض بالحياة</footer>
  </div></main>;
 }

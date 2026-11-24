@@ -21,11 +21,13 @@ export default async function WorkPage({ params, searchParams }: Props) {
     supabase.from("tasks").select("id,title,status,priority,project_id,assignee_id,due_date").eq("company_id",id).order("created_at",{ascending:false}).limit(50),
     supabase.from("company_members").select("user_id,profiles(full_name)").eq("company_id",id),
   ]);
-  if (!company.data || !membership.data) notFound();
-  const role = membership.data.role;
+  const office = company.data;
+  const currentMembership = membership.data;
+  if (!office || !currentMembership) notFound();
+  const role = currentMembership.role;
   const canManage = role === "owner" || role === "admin" || role === "department_head";
   const allDepartments = departments.data ?? [];
-  const departmentRows = membership.data.role === "department_head" ? allDepartments.filter((d) => d.id === membership.data.department_id) : allDepartments;
+  const departmentRows = currentMembership.role === "department_head" ? allDepartments.filter((d) => d.id === currentMembership.department_id) : allDepartments;
   const projectRows = projects.data ?? [];
   const taskRows = tasks.data ?? [];
   const memberRows = members.data ?? [];
@@ -38,7 +40,7 @@ export default async function WorkPage({ params, searchParams }: Props) {
 
   return <main className="app-shell"><div className="mx-auto max-w-7xl">
     <header className="app-header"><Link href="/" className="brand-lockup"><span className="brand-mark">◈</span><span>المكتب</span></Link><div className="flex items-center gap-4"><Link href={`/offices/${id}`} className="nav-link">إعداد المكتب</Link><Link href={`/offices/${id}/team`} className="nav-link">الفريق</Link><form action={signOut}><button className="nav-link">خروج</button></form></div></header>
-    <section className="page-heading"><div><p className="eyebrow">مساحة العمل / {company.data.name}</p><h1>صباح الإنجاز.</h1><p>هنا تتحول الخطط إلى مشاريع ومهام واضحة للفريق.</p></div><span className="role-pill">{role === "owner" ? "رئيس الشركة" : role === "admin" ? "مدير الشركة" : role === "department_head" ? "رئيس قسم" : "موظف"}</span></section>
+    <section className="page-heading"><div><p className="eyebrow">مساحة العمل / {office.name}</p><h1>صباح الإنجاز.</h1><p>هنا تتحول الخطط إلى مشاريع ومهام واضحة للفريق.</p></div><span className="role-pill">{role === "owner" ? "رئيس الشركة" : role === "admin" ? "مدير الشركة" : role === "department_head" ? "رئيس قسم" : "موظف"}</span></section>
     <div className="stepper"><Link className="step complete" href={`/offices/${id}`}><b>1</b><span>إنشاء الأقسام</span></Link><span className="step-line"/><Link className="step complete" href={`/offices/${id}/team`}><b>2</b><span>دعوة الفريق</span></Link><span className="step-line"/><span className="step current"><b>3</b><span>بدء العمل</span></span></div>
     {query.joined && <div className="notice notice-success">انضممت إلى المكتب بنجاح. أهلًا بك في الفريق.</div>}
     {query.error && <div className="notice notice-error">تعذر حفظ العنصر. تأكد من البيانات والصلاحيات.</div>}

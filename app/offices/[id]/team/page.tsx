@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createInvitation, removeMember, signOut, updateMemberRole } from "@/app/actions";
-import { CopyInviteLink } from "@/components/copy-invite-link";
 import { createClient } from "@/lib/supabase/server";
 
-type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; inviteToken?: string; updated?: string; removed?: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; sent?: string; updated?: string; removed?: string }> };
 
 export default async function TeamPage({ params, searchParams }: Props) {
   const { id } = await params;
@@ -33,8 +32,7 @@ export default async function TeamPage({ params, searchParams }: Props) {
       <header className="app-header"><Link href="/" className="brand-lockup"><span className="brand-mark">◈</span><span>المكتب</span></Link><div className="flex items-center gap-4"><Link href={`/offices/${id}/virtual`} className="nav-link">المكتب الافتراضي</Link><Link href={`/offices/${id}`} className="nav-link">الأقسام</Link><Link href={`/offices/${id}/settings`} className="nav-link">الإعدادات</Link><Link href={`/offices/${id}/work`} className="nav-link">مساحة العمل</Link><form action={signOut}><button className="nav-link">خروج</button></form></div></header>
       <section className="page-heading"><div><p className="eyebrow">إدارة الفريق / {companyResult.data.name}</p><h1>فريقك، بصلاحيات واضحة.</h1><p>أضف أعضاء الفريق وحدد مسؤولياتهم، واحتفظ بقرار الإدارة بيد أصحاب الصلاحية.</p></div><span className="role-pill">{roleLabels[role] ?? role}</span></section>
       <div className="stepper"><Link className="step complete" href={`/offices/${id}`}><b>1</b><span>إنشاء الأقسام</span></Link><span className="step-line"/><span className="step current"><b>2</b><span>دعوة الفريق</span></span><span className="step-line"/><Link className="step" href={`/offices/${id}/work`}><b>3</b><span>بدء العمل</span></Link></div>
-      {query.inviteToken && <CopyInviteLink token={query.inviteToken}/>}
-      {(query.error || query.updated || query.removed) && <div className={query.error ? "notice notice-error" : "notice notice-success"}>{query.error ? "لم نتمكن من تنفيذ العملية. تحقق من صلاحياتك والبيانات." : query.updated ? "تم تحديث صلاحيات العضو." : "تمت إزالة العضو من المكتب."}</div>}
+      {(query.error || query.updated || query.removed) && <div className={query.error ? "notice notice-error" : "notice notice-success"}>{query.error === "email-config" ? "إرسال البريد غير مفعّل بعد. أضف RESEND_API_KEY وINVITATION_FROM_EMAIL وNEXT_PUBLIC_SITE_URL إلى متغيرات البيئة." : query.error === "email-send" ? "تعذر إرسال الرسالة. تحقق من إعدادات خدمة البريد وحاول مجددًا." : query.error ? "لم نتمكن من تنفيذ العملية. تحقق من صلاحياتك والبيانات." : query.sent ? "تم إرسال الدعوة إلى البريد الإلكتروني بنجاح." : query.updated ? "تم تحديث صلاحيات العضو." : "تمت إزالة العضو من المكتب."}</div>}
       <div className="team-layout">
         <section className="panel">
           <div className="panel-heading"><div><h2>أعضاء المكتب</h2><p>{members.length} عضو في مساحة العمل</p></div><span className="count-badge">{members.length}</span></div>
@@ -65,13 +63,13 @@ export default async function TeamPage({ params, searchParams }: Props) {
           </div>
         </section>
         <aside className="panel invite-panel">
-          <span className="panel-icon">✳</span><h2>وجّه دعوة لفريقك</h2><p>أدخل بريد الموظف، وحدد دوره والقسم الذي سينضم إليه. سيُنشأ رابط دعوة خاص صالح لمدة 7 أيام.</p>
+          <span className="panel-icon">✳</span><h2>وجّه دعوة لفريقك</h2><p>أدخل البريد الإلكتروني وحدد الدور والقسم؛ سنرسل رسالة دعوة مباشرة إلى الموظف.</p>
           {canManage ? <form action={createInvitation} className="invite-form">
             <input type="hidden" name="companyId" value={id}/>
             <label>البريد الإلكتروني</label><input className="field" name="email" type="email" placeholder="name@company.com" required/>
             <label>الصلاحية</label><select className="field" name="role" defaultValue="member"><option value="member">موظف</option>{departments.length > 0 && <option value="department_head">مدير قسم</option>}{canAssignAdmin && <option value="admin">مدير الشركة</option>}</select>
             <label>القسم</label><select className="field" name="departmentId" defaultValue=""><option value="">بدون قسم</option>{departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
-            <button className="primary-button w-full" type="submit">إنشاء رابط الدعوة</button>
+            <button className="primary-button w-full" type="submit">إرسال الدعوة بالبريد</button>
           </form> : <div className="permission-note">إدارة الدعوات وتغيير الصلاحيات متاحة لمدير الشركة ورئيسها فقط.</div>}
           <div className="permission-note"><strong>تدرّج الصلاحيات</strong><br/>رئيس الشركة ← مدير الشركة ← مدير قسم ← موظف</div>
         </aside>

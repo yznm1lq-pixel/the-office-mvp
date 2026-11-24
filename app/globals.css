@@ -155,3 +155,73 @@ body{background:linear-gradient(180deg,#fafaff 0,#f5f6fb 48%,#f7f8fc 100%)}
 .neighbor-orb{display:flex;width:60px;height:60px;align-items:center;justify-content:center;margin:0 auto 20px;border-radius:20px;background:#f0eeff;color:#6255ca;font-size:27px}.neighbors-footer{padding:35px 0 10px;border-top:1px solid #e8e8f0;color:#a0a5b3;text-align:center;font-size:10px}
 @media(max-width:950px){.neighbor-directory{grid-template-columns:repeat(2,minmax(0,1fr))}.neighbors-hero{padding:36px;gap:15px}.neighbor-requests-grid{grid-template-columns:1fr}}
 @media(max-width:650px){.neighbors-shell{padding:13px}.neighbors-nav{align-items:flex-start}.neighbors-nav>div{gap:10px;flex-wrap:wrap;justify-content:flex-end}.neighbors-hero{grid-template-columns:1fr;padding:30px 24px;margin:22px 0 40px}.neighbors-hero-art{min-height:210px}.neighbors-hero-stats{gap:14px}.neighbor-directory{grid-template-columns:1fr}.neighbors-section-title{align-items:flex-start;flex-direction:column}.neighbor-request-row,.neighbor-meeting-row{align-items:flex-start;flex-direction:column}.neighbor-meeting-form{width:100%;max-width:none;grid-template-columns:1fr}.neighbor-meeting-form label,.neighbor-meeting-form button{grid-column:auto}}
+
+
+/* Classic editorial identity */
+:root{--ink:#292d2b;--muted:#737a73;--paper:#f4f2ec;--line:#dfddd4;--violet:#496557;--violet-dark:#344b40;--navy:#263a32;--green:#52735e}
+html,body{background:#f4f2ec}
+body{color:#292d2b;background:#f4f2ec;font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif}
+.primary-button{background:#405d4d;box-shadow:0 5px 14px #334b3b20;border-radius:8px}
+.primary-button:hover{background:#2f493a}
+.secondary-button,.role-pill,.count-badge{background:#edf0e9;border-color:#dce3d9;color:#405d4d;border-radius:8px}
+.field{border-color:#d9d8cf;border-radius:8px;background:#fffefa}
+.field:focus{border-color:#718b77;box-shadow:0 0 0 3px #52735e18}
+.surface,.panel{background:#fffefa;border-color:#e3e0d7;box-shadow:0 8px 24px #252b2410;backdrop-filter:none}
+.panel{border-radius:12px}
+.brand-mark{background:#405d4d;border-radius:8px;box-shadow:none}
+.brand-lockup{letter-spacing:-.02em}
+.app-shell{background:#f4f2ec}
+.app-header{border-color:#dedbd1}
+.nav-link:hover,.virtual-nav a:hover{color:#405d4d}
+.eyebrow{color:#55735e}
+.page-heading h1,.virtual-heading h1{letter-spacing:-.025em}
+.step.current{color:#405d4d}.step.current b{border-color:#405d4d;background:#405d4d}
+.step.complete{color:#52735e}
+.virtual-shell{padding:20px;background:#f1efe8}
+.virtual-topbar{border-color:#dcd9cf}
+.virtual-floor-panel,.virtual-side-card{border-radius:12px;border-color:#dedbd2;background:#fffefa;box-shadow:0 8px 25px #292d2710}
+.virtual-floor-panel{padding:24px}
+.virtual-live-pill{border-radius:8px;background:#edf3ed;border-color:#d7e2d7;color:#42624b}
+.virtual-live-pill i{background:#56815d;box-shadow:0 0 0 4px #56815d20}
+.neighbors-shell{background:#f1efe8;color:#292d2b}
+.neighbors-nav{border-color:#dcd9cf}
+.neighbors-hero{border-radius:14px;background:#2f4539;box-shadow:none}
+.neighbors-hero em{color:#d6c9a4}
+.neighbor-company-card,.neighbor-request-panel{border-radius:12px;border-color:#dedbd2;background:#fffefa;box-shadow:0 8px 25px #292d270b}
+.neighbor-connect-button,.neighbor-accept{background:#405d4d;border-radius:7px}
+.neighbor-company-links a{color:#496557}
+.neighbor-company-logo{border-radius:8px;background:#edf0e9;color:#405d4d}
+@media(max-width:640px){.virtual-shell{padding:12px}.virtual-floor-panel{padding:14px}}
+/* Architectural floor plan: furnished, top-down, human-scale */
+.office-plan-scene{position:relative;min-height:570px;margin:18px 0 4px;padding:28px;overflow:hidden;border:1px solid #d8d4c8;border-radius:10px;background-color:#e8e4d9;background-image:linear-gradient(#d6d1c555 1px,transparent 1px),linear-gradient(90deg,#d6d1c555 1px,transparent 1px);background-size:28px 28px}
+.office-plan-building{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:18px;min-height:500px;padding:22px;border:9px solid #9d9a8c;background:#f8f6ef;box-shadow:0 12px 0 #c6c1b4,0 24px 45px #3c3a3020}
+.office-room{position:relative;min-height:205px;padding:18px;border:3px solid #b9b5a8;background:#f1eee5}
+.office-room h3{margin:0 0 14px;font-size:13px;font-weight:800;color:#4a5149}
+.office-room small{display:block;color:#85877d;font-size:10px}
+.office-room-desks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.office-desk{position:relative;display:flex;min-height:62px;align-items:center;justify-content:center;flex-direction:column;gap:4px;border:1px solid #c2bcae;border-radius:4px;background:#d8d2c4;box-shadow:0 4px 0 #bcb5a6;color:#5c6258;font-size:9px}
+.office-desk:before{content:"";position:absolute;top:-8px;width:22px;height:8px;border-radius:4px 4px 0 0;background:#a9a28f}
+.office-desk i{width:11px;height:11px;border-radius:50%;background:#607b66;box-shadow:0 0 0 3px #fff}
+.office-desk.is-empty i{background:#aaa99e}
+.office-plan-lounge{position:absolute;bottom:18px;left:50%;display:flex;align-items:center;gap:12px;transform:translateX(-50%);padding:12px 20px;border:1px solid #c6c0b2;border-radius:8px;background:#e8e2d4;color:#62665d;font-size:11px}
+.office-plan-lounge:before{content:"";width:50px;height:18px;border-radius:5px;background:#9aab98;box-shadow:0 5px 0 #788c78}
+.office-plan-entry{position:absolute;bottom:-9px;left:50%;width:100px;height:10px;transform:translateX(-50%);background:#f8f6ef}
+.office-plan-caption{display:flex;justify-content:space-between;gap:12px;margin-top:14px;color:#777b70;font-size:11px}
+@media(max-width:640px){.office-plan-scene{padding:10px;min-height:620px}.office-plan-building{grid-template-columns:1fr;gap:10px;padding:12px;border-width:6px}.office-room{min-height:130px;padding:12px}.office-room-desks{grid-template-columns:repeat(3,1fr);gap:8px}.office-desk{min-height:48px}.office-plan-lounge{position:static;transform:none;justify-content:center;margin-top:12px}.office-plan-caption{font-size:9px}}
+/* Neighbors: a walkable office corridor with named doors */
+.neighbors-hero{position:relative;overflow:hidden;min-height:330px;padding:44px;background:linear-gradient(110deg,#2e4438,#3f5948)}
+.neighbors-hero-art{border:1px solid #ffffff24;border-radius:8px;background:repeating-linear-gradient(90deg,#ffffff08 0 2px,transparent 2px 72px),linear-gradient(180deg,#52695a,#293d32);box-shadow:inset 0 0 0 12px #ffffff08}
+.neighbor-art-center{border-radius:6px;background:#e7e1d2;color:#354b3d;box-shadow:0 10px 0 #bdb5a4}
+.neighbor-node{border-radius:5px;background:#e9e4d8;color:#435846}
+.neighbor-orbit{border-color:#ffffff24}
+.neighbor-company-card{position:relative;overflow:hidden;padding:22px 22px 20px 30px;border-radius:8px;box-shadow:0 8px 20px #2d352b0b}
+.neighbor-company-card:before{content:"";position:absolute;inset:0 auto 0 0;width:9px;background:#8a9b83}
+.neighbor-company-card:after{content:"";position:absolute;left:11px;top:50%;width:5px;height:5px;border-radius:50%;background:#a58c5c}
+.neighbor-company-head{margin-bottom:15px}
+.neighbor-company-card h3{font-size:19px;color:#303b32}
+.neighbor-company-card p{min-height:56px;color:#777b72;line-height:1.9}
+.neighbor-company-links{padding:12px 0;border-top:1px solid #e8e5dc}
+.neighbor-request-form textarea{border-radius:6px;border-color:#e1ded5;background:#faf9f4}
+.neighbor-connect-button{background:#405d4d}
+.neighbors-section-title h2{color:#303b32}
+@media(max-width:640px){.neighbors-hero{padding:25px;min-height:0}.neighbors-hero-art{min-height:210px}}

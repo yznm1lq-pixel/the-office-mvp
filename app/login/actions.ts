@@ -7,31 +7,34 @@ function value(formData: FormData, key: string) { return String(formData.get(key
 function safeNext(raw: string) { return raw.startsWith("/") && !raw.startsWith("//") ? raw : "/"; }
 
 export async function signIn(formData: FormData) {
-  const email = value(formData, "email");
+  const username = value(formData, "username").toLowerCase();
   const password = value(formData, "password");
   const next = safeNext(value(formData, "next"));
-  if (!email || !password) redirect("/login?error=missing");
+  if (!username || !password) redirect("/login?error=missing");
   const supabase = await createClient();
+  const { data: resolved } = await supabase.rpc("resolve_username_login", { p_username: username });
+  const email = typeof resolved === "string" ? resolved : (username.includes("@") ? username : null);
+  if (!email) redirect("/login?error=credentials");
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect("/login?error=credentials");
   redirect(next);
 }
 
 export async function signUp(formData: FormData) {
-  const fullName = value(formData, "fullName");
-  const email = value(formData, "email");
+  const username = value(formData, "username").toLowerCase().replace(/^@/, "");
   const password = value(formData, "password");
-  const next = safeNext(value(formData, "next"));
-  if (!fullName || !email || password.length < 8) redirect("/login?error=signup");
+  if (!/^[a-z0-9_]{3,24}$/.test(username) || password.length < 8) redirect("/login?error=signup");
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://the-office-mvp.vercel.app";
-  const { data, error } = await supabase.auth.signUp({
+  const email = `${username}@accounts.theoffice.invalid`;
+  const { error } = await supabase.auth.signUp({
     email, password,
-    options: { data: { full_name: fullName }, emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}` },
+    options: { data: { username } },
   });
   if (error) redirect("/login?error=signup");
-  if (data.session) redirect(next);
-  redirect(`/login?message=check-email&next=${encodeURIComponent(next)}`);
+  // بعض إعدادات Supabase لا تعيد جلسة في signUp؛ نجرّب الدخول مباشرة بعد تأكيد الحساب الآلي للحسابات الداخلية.
+  const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+  if (loginError) redirect("/login?error=auth-config");
+  redirect("/onboarding/profile");
 }
 
 export async function signInFromInvitation(formData: FormData) {

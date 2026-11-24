@@ -225,3 +225,23 @@ body{color:#292d2b;background:#f4f2ec;font-family:'IBM Plex Sans Arabic',Tahoma,
 .neighbor-connect-button{background:#405d4d}
 .neighbors-section-title h2{color:#303b32}
 @media(max-width:640px){.neighbors-hero{padding:25px;min-height:0}.neighbors-hero-art{min-height:210px}}
+
+/* Site-wide classic visual system v2 */
+:root{--ink:#292d2b;--muted:#747a72;--paper:#f4f2ec;--line:#dfddd4;--violet:#496557;--violet-dark:#344b40;--navy:#263a32;--green:#52735e}
+html,body{background:#f4f2ec;color:#292d2b}
+body{background:#f4f2ec;font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif}
+.primary-button{background:#405d4d;border-radius:8px;box-shadow:none}.primary-button:hover{background:#2f493a}
+.secondary-button,.role-pill,.count-badge{background:#edf0e9;border-color:#dce3d9;color:#405d4d;border-radius:8px}
+.field{border-color:#d9d8cf;border-radius:8px;background:#fffefa}.field:focus{border-color:#718b77;box-shadow:0 0 0 3px #52735e18}
+.surface,.panel,.stat-card{background:#fffefa;border-color:#e3e0d7;box-shadow:0 8px 24px #252b2410;backdrop-filter:none}.panel{border-radius:12px}
+.brand-mark{background:#405d4d;border-radius:8px;box-shadow:none}
+.app-shell,.neighbors-shell{background:#f4f2ec;color:#292d2b}.app-header,.neighbors-nav,.virtual-topbar{border-color:#dedbd1}
+.nav-link:hover{color:#405d4d}.eyebrow{color:#55735e}
+.page-heading h1{letter-spacing:-.025em}.member-avatar,.panel-icon,.project-mark{border-radius:8px;background:#edf0e9;color:#405d4d}
+.department-card,.project-card,.task-row{border-radius:8px;border-color:#e3e0d7;background:#fffefa}
+.invite-panel{position:static}.permission-note{background:#f0f1e9;color:#66745f;border-radius:8px}
+.notice{border-radius:8px}.step b{border-radius:6px}.step.current{color:#405d4d}.step.current b{background:#405d4d;border-color:#405d4d}
+.neighbors-hero{border-radius:12px;background:#2f4539;box-shadow:none}.neighbor-company-card,.neighbor-request-panel{border-radius:10px;border-color:#dedbd2;background:#fffefa;box-shadow:0 8px 25px #292d270b}
+.neighbor-connect-button,.neighbor-accept{background:#405d4d;border-radius:7px}
+.virtual-shell{background:#f1efe8}.virtual-floor-panel,.virtual-side-card{border-radius:12px;border-color:#dedbd2;background:#fffefa;box-shadow:0 8px 25px #292d2710}
+@media(max-width:640px){.app-shell{padding:14px 12px 35px}.team-layout,.setup-layout,.work-layout{grid-template-columns:1fr}.page-heading{align-items:start;flex-direction:column}.app-header{align-items:flex-start;flex-wrap:wrap}}

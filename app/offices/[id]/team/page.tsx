@@ -26,7 +26,7 @@ export default async function TeamPage({ params, searchParams }: Props) {
   const canAssignAdmin = role === "owner";
   const members = membersResult.data ?? [];
   const departments = departmentsResult.data ?? [];
-  const roleLabels: Record<string,string> = { owner: "رئيس الشركة", admin: "مدير الشركة", department_head: "رئيس قسم", member: "موظف" };
+  const roleLabels: Record<string,string> = { owner: "رئيس الشركة", admin: "مدير الشركة", department_head: "مدير قسم", member: "موظف" };
 
   return <main className="app-shell">
     <div className="mx-auto max-w-7xl">
@@ -50,7 +50,7 @@ export default async function TeamPage({ params, searchParams }: Props) {
                     <input type="hidden" name="companyId" value={id}/><input type="hidden" name="userId" value={member.user_id}/>
                     <select name="role" defaultValue={member.role} className="compact-select">
                       {canAssignAdmin && <option value="admin">مدير الشركة</option>}
-                      {departments.length > 0 && <option value="department_head">رئيس قسم</option>}<option value="member">موظف</option>
+                      {departments.length > 0 && <option value="department_head">مدير قسم</option>}<option value="member">موظف</option>
                     </select>
                     <select name="departmentId" defaultValue={member.department_id ?? departments[0]?.id ?? ""} className="compact-select" aria-label="القسم">
                       <option value="">اختر القسم</option>{departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -69,11 +69,11 @@ export default async function TeamPage({ params, searchParams }: Props) {
           {canManage ? <form action={createInvitation} className="invite-form">
             <input type="hidden" name="companyId" value={id}/>
             <label>البريد الإلكتروني</label><input className="field" name="email" type="email" placeholder="name@company.com" required/>
-            <label>الصلاحية</label><select className="field" name="role" defaultValue="member"><option value="member">موظف</option>{departments.length > 0 && <option value="department_head">رئيس قسم</option>}{canAssignAdmin && <option value="admin">مدير الشركة</option>}</select>
+            <label>الصلاحية</label><select className="field" name="role" defaultValue="member"><option value="member">موظف</option>{departments.length > 0 && <option value="department_head">مدير قسم</option>}{canAssignAdmin && <option value="admin">مدير الشركة</option>}</select>
             <label>القسم</label><select className="field" name="departmentId" defaultValue=""><option value="">بدون قسم</option>{departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
             <button className="primary-button w-full" type="submit">إنشاء رابط الدعوة</button>
           </form> : <div className="permission-note">إدارة الدعوات وتغيير الصلاحيات متاحة لمدير الشركة ورئيسها فقط.</div>}
-          <div className="permission-note"><strong>تدرّج الصلاحيات</strong><br/>رئيس الشركة ← مدير الشركة ← رئيس قسم ← موظف</div>
+          <div className="permission-note"><strong>تدرّج الصلاحيات</strong><br/>رئيس الشركة ← مدير الشركة ← مدير قسم ← موظف</div>
         </aside>
       </div>
       <div className="page-footer"><Link className="primary-button" href={`/offices/${id}/work`}>متابعة إلى مساحة العمل <span className="mr-2">←</span></Link></div>

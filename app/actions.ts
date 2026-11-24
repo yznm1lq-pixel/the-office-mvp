@@ -215,6 +215,43 @@ export async function createTask(formData: FormData) {
   redirect(`/offices/${companyId}/work?task=created`);
 }
 
+
+export async function createNeighborRequest(formData: FormData) {
+  const toCompanyId = textValue(formData, "toCompanyId");
+  const fromCompanyId = textValue(formData, "fromCompanyId");
+  const message = textValue(formData, "message").slice(0,1200);
+  if (!uuidPattern.test(toCompanyId) || !uuidPattern.test(fromCompanyId) || toCompanyId === fromCompanyId || message.length < 10) redirect("/neighbors?error=request");
+  const { supabase, userId } = await signedInClient();
+  const { error } = await supabase.from("neighbor_requests").insert({ from_company_id: fromCompanyId, to_company_id: toCompanyId, requested_by: userId, message });
+  if (error) redirect("/neighbors?error=request");
+  revalidatePath("/neighbors");
+  redirect("/neighbors?sent=1");
+}
+
+export async function respondNeighborRequest(formData: FormData) {
+  const requestId = textValue(formData, "requestId");
+  const status = textValue(formData, "status");
+  if (!uuidPattern.test(requestId) || !["accepted","declined"].includes(status)) redirect("/neighbors?error=response");
+  const { supabase } = await signedInClient();
+  const { error } = await supabase.from("neighbor_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", requestId);
+  if (error) redirect("/neighbors?error=response");
+  revalidatePath("/neighbors");
+  redirect("/neighbors?updated=1");
+}
+
+export async function proposeNeighborMeeting(formData: FormData) {
+  const requestId = textValue(formData, "requestId");
+  const startsAt = textValue(formData, "startsAt");
+  const agenda = textValue(formData, "agenda").slice(0,800);
+  const date = new Date(startsAt);
+  if (!uuidPattern.test(requestId) || !startsAt || Number.isNaN(date.getTime()) || date <= new Date()) redirect("/neighbors?error=meeting");
+  const { supabase, userId } = await signedInClient();
+  const { error } = await supabase.from("neighbor_meetings").insert({ request_id: requestId, proposed_by: userId, starts_at: date.toISOString(), agenda, duration_minutes: 30 });
+  if (error) redirect("/neighbors?error=meeting");
+  revalidatePath("/neighbors");
+  redirect("/neighbors?meeting=proposed");
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

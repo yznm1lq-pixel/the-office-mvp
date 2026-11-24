@@ -30,7 +30,7 @@ export default async function VirtualOfficePage({params,searchParams}:Props){
     <div className="floor-label"><div><span className="eyebrow">THE OFFICE / LIVE SPACE</span><h2>المكتب الافتراضي</h2></div><span className="floor-chip">المساحة الرئيسية</span></div>
     <div className="isometric-scene"><div className="iso-floor">
       <div className="floor-grid"/>
-      {departmentsList.slice(0,6).map((d,index)=><div className={`iso-zone zone-${index+1}`} key={d.id} style={{["--zone-color" as string]:d.color}}><span>{d.name}</span><div className="iso-desk"><i/><i/></div><div className="iso-desk second"><i/><i/></div></div>)}
+      {departmentsList.slice(0,6).map((d,index)=><div className={`iso-zone zone-${index+1}`} key={d.id} style={{["--zone-color" as any]:d.color}}><span>{d.name}</span><div className="iso-desk"><i/><i/></div><div className="iso-desk second"><i/><i/></div></div>)}
       <div className="iso-lounge"><span>مساحة اللقاء</span><div className="lounge-sofa"/><div className="lounge-table"/></div>
     </div></div>
     <div className="floor-legend"><span><i className="legend-online"/> متصل الآن</span><span><i className="legend-offline"/> غير متصل</span><span>تتحدث حالة الحضور تلقائيًا</span></div>

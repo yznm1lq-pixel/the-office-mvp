@@ -133,10 +133,14 @@ returns uuid language plpgsql security definer set search_path = ''
 as $$
 declare
   v_user_id uuid:=auth.uid();
-  v_email text:=lower(coalesce(auth.jwt()->>'email',''));
+  v_email text;
   v_inv public.company_invitations%rowtype;
 begin
   if v_user_id is null then raise exception 'AUTH_REQUIRED'; end if;
+  select lower(u.email) into v_email
+  from auth.users u
+  where u.id=v_user_id and u.email_confirmed_at is not null;
+  if v_email is null then raise exception 'EMAIL_NOT_VERIFIED'; end if;
   if p_token is null or length(p_token)<32 then raise exception 'INVITE_INVALID_OR_EXPIRED'; end if;
   select * into v_inv from public.company_invitations i
   where i.token_hash=encode(extensions.digest(p_token,'sha256'),'hex')

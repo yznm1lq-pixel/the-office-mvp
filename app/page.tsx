@@ -33,6 +33,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     }
 
     if (userId) {
+      const { data: availableSpaces } = await supabase.from("office_spaces").select("id,floor_number,door_number,area_sqm,tier,rent_label").eq("status","available").is("company_id",null).order("floor_number").order("door_number");
+      spaces = (availableSpaces ?? []) as OfficeSpace[];
       // لا تعرض أي شركة إلا إذا كان المستخدم عضوًا فيها.
       const { data: memberships } = await supabase.from("company_members").select("company_id").eq("user_id", userId);
       const companyIds = [...new Set((memberships ?? []).map((membership) => membership.company_id))];

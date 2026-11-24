@@ -688,3 +688,49 @@ label{color:#4c554a}
 @media(max-width:1000px){.floor-room-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.map-doors-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.office-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.vintage-appbar,.neighbors-vintage-nav{align-items:flex-start;flex-wrap:wrap}.office-main-nav{order:3;width:100%;gap:13px;padding-top:9px}.vintage-office-title{align-items:flex-start;flex-direction:column;padding-top:27px}.floor-overview-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.floor-overview-strip .floor-open-hours{grid-column:1/-1}.architectural-floor{padding:14px 9px 10px;border-width:5px}.floor-room-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(170px,auto);gap:5px;padding:5px}.floor-office-room,.floor-meeting-room,.floor-reception,.floor-lounge{padding:8px}.room-header h3,.floor-meeting-room h3,.floor-reception h3,.floor-lounge h3{font-size:11px}.workstation-desk{width:48px}.floor-map-legend small{width:100%;margin:0}.neighbor-building-hero{grid-template-columns:1fr;padding:27px 21px;gap:24px}.neighbor-building-sketch{max-width:310px;min-height:235px}.map-doors-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:13px 0}.neighbor-floor-map{padding:15px 10px 0;border-width:5px}.door-frame{height:130px}.neighbor-activity-grid{grid-template-columns:1fr}.neighbor-activity-row{align-items:flex-start;flex-direction:column}.neighbor-meeting-card{align-items:flex-start;flex-direction:column}.neighbor-meeting-time{text-align:start}.neighbor-section-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:420px){.map-doors-grid{grid-template-columns:1fr}.neighbor-door-card{display:grid;grid-template-columns:90px 1fr;gap:0 12px}.door-number{grid-column:1/-1}.door-frame{grid-row:2/5;height:125px}.door-card-meta,.neighbor-door-card>p,.door-actions{grid-column:2}.door-card-meta{align-self:end}.neighbor-door-card>p{min-height:0}.door-actions{align-self:end}.floor-room-grid{grid-template-columns:1fr 1fr}.office-shortcuts{grid-template-columns:1fr 1fr}}
+
+
+/* Consistent editorial UI across the dashboard, team and conversations */
+.app-shell{background:transparent;min-height:100vh;padding:24px clamp(14px,3vw,42px) 60px}
+.app-shell>div{max-width:1180px!important}
+.app-header{border-bottom-color:#d9d2c4;padding-bottom:16px}
+.app-header .office-main-nav{display:flex;gap:clamp(10px,1.8vw,24px);flex-wrap:wrap}
+.app-header .office-main-nav a{font-size:12px;font-weight:700;color:#73766b}
+.app-header .office-main-nav a:hover{color:#34483a}
+.page-heading{margin:35px 0 23px}
+.page-heading h1{color:#34483a}
+.page-heading p:not(.eyebrow){color:#7d7c70}
+.panel{border-radius:8px;padding:clamp(17px,2.5vw,27px);box-shadow:0 10px 28px #39372c0b}
+.team-layout{grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+.member-row{gap:13px;border-color:#e4ddcf}
+.member-avatar{width:44px;height:44px;border-radius:50%;background:#e5eadd;color:#415640}
+.member-meta strong{color:#35483a}
+.member-meta span{color:#89887b}
+.member-actions{gap:7px}
+.compact-select{max-width:140px;border-radius:5px;border-color:#d8d0c1;background:#fffdf7;color:#495344}
+.icon-action{border-radius:4px;background:#e4eadf;color:#405b42}
+.remove-action{border-radius:4px;background:#f5e8df;color:#9b6049}
+.invite-panel{background:#f8f5eb;border-color:#d8d0bf}
+.invite-panel h2{color:#34483a}
+.invite-panel>p{color:#77796d;line-height:2}
+.invite-form{gap:10px}
+.permission-note{border-radius:5px;background:#e9ede3;color:#5c6957}
+.panel-heading h2{color:#34483a}
+.panel-heading p{color:#858477}
+.count-badge,.role-pill{border-radius:4px;background:#e6eadf;color:#4f654a}
+.chat-live-indicator{display:inline-flex;align-items:center;gap:7px;color:#55734f;font-size:10px;font-weight:800}
+.chat-live-indicator i{width:7px;height:7px;border-radius:50%;background:#68966a;box-shadow:0 0 0 4px #68966a20}
+.chat-composer{position:sticky;bottom:0;margin:0 -4px -4px;padding:16px 4px 4px;background:linear-gradient(180deg,#fbf9f2ee,#fbf9f2 24%)}
+.chat-composer textarea{resize:vertical;min-height:90px;line-height:1.8}
+.chat-composer select,.chat-composer textarea{border-radius:6px}
+.chat-composer .primary-button{min-width:120px}
+.chat-composer label{font-size:11px;color:#656c60}
+.chat-message{max-width:82%;padding:13px 15px;border:1px solid #ded7c8;background:#fffdf7;border-radius:10px 10px 10px 3px}
+.chat-message.mine{margin-inline-start:auto;background:#e9eee4;border-color:#d0d9c9;border-radius:10px 10px 3px 10px}
+.app-shell .notice{border-radius:5px}
+.app-shell .primary-button{border-radius:5px}
+.app-shell .field{border-radius:5px;background:#fffdf7;border-color:#d8d0c1}
+.app-shell .field:focus{border-color:#78896b;box-shadow:0 0 0 3px #78896b24}
+.app-shell .empty-state{border-radius:6px;border-color:#d8d0c1;background:#f8f5eb;color:#77796d}
+@media(max-width:850px){.team-layout{grid-template-columns:1fr}.invite-panel{position:static}.member-row{flex-wrap:wrap}.member-actions{width:100%;justify-content:flex-start;padding-inline-start:56px}}
+@media(max-width:560px){.app-shell{padding:14px 12px 40px}.app-header{align-items:flex-start;flex-wrap:wrap}.app-header .office-main-nav{order:3;width:100%;gap:12px}.app-header .office-main-nav a{font-size:11px}.member-actions{padding-inline-start:0}.compact-select{max-width:115px}.panel{padding:16px}.chat-composer{position:static}}

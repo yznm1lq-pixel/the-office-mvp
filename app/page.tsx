@@ -62,12 +62,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </nav>
         <section className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center pt-16 md:pt-24">
           <div>
-            <p className="text-violet-700 font-bold text-sm mb-5">مساحة عمل افتراضية للفِرق العربية</p>
-            <h1 className="text-5xl md:text-6xl font-black leading-[1.2] tracking-tight">مكتبك، فريقك،<br /><span className="text-violet-700">كل شغلك.</span></h1>
-            <p className="text-slate-500 text-lg leading-9 mt-7 max-w-xl">اجمع فريقك ومشاريعك ومهامك ومحادثاتك في مساحة عمل واحدة. ابدأ ببناء مكتبك الافتراضي، واترك الباقي يكبر مع فريقك.</p>
+            <p className="text-violet-700 font-bold text-sm mb-5">بيئة عمل رقمية · مكتبك وفريقك في مساحة واحدة</p>
+            <h1 className="text-5xl md:text-6xl font-black leading-[1.2] tracking-tight">كل فريق يحتاج<br /><span className="text-violet-700">مساحة تجمعه.</span></h1>
+            <p className="text-slate-500 text-lg leading-9 mt-7 max-w-xl">أنشئ مكتب شركتك، وشاهد فريقك حاضرًا على مخطط تفاعلي، ونظّم الأقسام والمشاريع والمهام والمحادثات. مساحة عمل صُممت لتجعل العمل الجماعي أوضح وأقرب.</p>
             <div className="flex flex-wrap gap-3 mt-9">
-              <Link href="/login" className="primary-button">أنشئ مكتبك مجانًا <span className="mr-2">←</span></Link>
-              <a href="#features" className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-bold text-slate-600">اكتشف الفكرة</a>
+              <Link href="/login" className="primary-button">ابدأ ببناء مكتبك <span className="mr-2">←</span></Link>
+              <a href="#features" className="rounded-xl border border-slate-200 bg-white px-5 py-3 font-bold text-slate-600">شاهد ما يقدمه المكتب</a>
             </div>
           </div>
           <div className="office-hero-art">
@@ -78,12 +78,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </section>
         <section id="features" className="max-w-6xl mx-auto grid md:grid-cols-3 gap-4 mt-20">
           {[
-            ["01", "مكتب تفاعلي", "مساحة مرئية تقرّب الفريق وتمنح العمل مكانًا."],
-            ["02", "مشاريع ومهام", "نظّم العمل وتابع تقدّمه من مكان واحد."],
-            ["03", "تواصل الفريق", "محادثات داخلية تجمع الشركة وأقسامها."],
+            ["01", "مكتب مرئي", "مخطط يوضح الأقسام ومحطات العمل وحضور كل موظف."],
+            ["02", "إدارة العمل", "اربط المشاريع والمهام بالأشخاص والأقسام وتابع التقدم."],
+            ["03", "مجتمع مهني", "تواصل مع فريقك واكتشف الشركات والجيران في المبنى."],
           ].map(([n, title, desc]) => <article key={n} className="surface rounded-2xl p-6"><span className="text-xs font-bold text-violet-600">{n}</span><h2 className="font-black text-lg mt-4">{title}</h2><p className="text-sm text-slate-500 leading-7 mt-2">{desc}</p></article>)}
         </section>
-        <footer className="max-w-6xl mx-auto text-xs text-slate-400 mt-20 pb-8">المكتب · نسخة أولية قيد التطوير</footer>
+        <footer className="max-w-6xl mx-auto text-xs text-slate-400 mt-20 pb-8">المكتب · مساحة عمل صُممت لتقريب الفريق من عمله</footer>
       </main>
     );
   }
